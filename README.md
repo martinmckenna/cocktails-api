@@ -1,6 +1,6 @@
-### Getting Started
+## Getting Started
 
-#### Set up Virutal Env
+### Set up Virutal Env
 
 1. Make sure you have virtualenv installed
 
@@ -26,7 +26,7 @@ soruce your-dir-name-here/bin/activate
 deactivate
 ```
 
-#### Install Requirements
+### Install Requirements
 
 While in the venv, first make sure you have the correct version of python
 
@@ -41,7 +41,7 @@ Then
 pip install -r requirements.txt
 ```
 
-#### Create a local MySQL server
+### Create a local MySQL server
 
 Run the folllowing
 
@@ -56,7 +56,7 @@ Verify the installation succeeded with
 mysql -V
 ```
 
-#### Running the Project
+### Running the Project
 
 Run the following while `cd`ed into the project root
 
