@@ -1,13 +1,6 @@
 from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
 import json
-from settings import app
-from flask_marshmallow import Marshmallow
-
-
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
-
+from settings import db, ma
 
 class Cocktail(db.Model):
     __tablename__ = 'cocktails'
