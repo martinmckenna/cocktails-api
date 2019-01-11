@@ -7,6 +7,9 @@ def send_200(data, location='/'):
       json.dumps(data),
       status=200,
       mimetype='application/json',
+      headers={
+        "location": location
+      }
   )
 
 

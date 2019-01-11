@@ -29,6 +29,10 @@ class Liquor(db.Model):
         target_liquor.name = _name
         db.session.commit()
 
+    def delete_liquor_by_id(_id):
+        Liquor.query.filter_by(id=_id).delete()
+        db.session.commit()
+
 
 # Necessary for transforming sqlalchemy data into serialized JSON
 class LiquorSchema(ma.ModelSchema):

@@ -10,7 +10,7 @@ cocktails = Blueprint('cocktails', __name__)
 
 @cocktails.route('/cocktails')
 def get_cocktails():
-  return send_200(Cocktail.get_all_cocktails())
+  return send_200(Cocktail.get_all_cocktails(), '/cocktails/')
 
 
 def validCocktailObject(cocktailObject):
@@ -34,7 +34,7 @@ def add_cocktail():
       return post_error_payload("Invalid JSON")
   if(validCocktailObject(request_data)):
     Cocktail.add_cocktail(request_data['name'])
-    return send_200({})
+    return send_200({}, '/cocktails/')
   else:
     return post_error_payload()
 
@@ -47,6 +47,12 @@ def update_cocktail(id):
     return post_error_payload("Invalid JSON")
   if(validCocktailObject(request_data)):
     Cocktail.update_cocktail_by_id(id, request_data['name'])
-    return send_200(Cocktail.get_cocktail_by_id(id))
+    return send_200(Cocktail.get_cocktail_by_id(id), '/cocktails/' + str(id))
   else:
     return post_error_payload()
+
+
+@cocktails.route('/cocktails/<int:id>', methods=['DELETE'])
+def delete_cocktail(id):
+  Cocktail.delete_cocktail_by_id(id)
+  return send_200({}, '/cocktails/' + str(id))

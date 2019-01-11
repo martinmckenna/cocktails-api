@@ -11,7 +11,7 @@ liquors = Blueprint('liquors', __name__)
 
 @liquors.route('/liquors')
 def get_liquors():
-    return send_200(Liquor.get_all_liquors())
+    return send_200(Liquor.get_all_liquors(), '/liquors/')
 
 
 def validLiquorObject(liquorObject):
@@ -36,7 +36,7 @@ def add_liquor():
       return post_error_payload("Invalid JSON")
   if(validLiquorObject(request_data)):
     Liquor.add_liquor(request_data['name'])
-    return send_200({})
+    return send_200({}, '/liquors/')
   else:
     return post_error_payload()
 
@@ -49,6 +49,12 @@ def update_liquor(id):
     return post_error_payload("Invalid JSON")
   if(validLiquorObject(request_data)):
     Liquor.update_liquor_by_id(id, request_data['name'])
-    return send_200(Liquor.get_liquor_by_id(id))
+    return send_200(Liquor.get_liquor_by_id(id), "/liquors/" + str(id))
   else:
     return post_error_payload()
+
+
+@liquors.route('/liquors/<int:id>', methods=['DELETE'])
+def delete_liquor(id):
+  Liquor.delete_liquor_by_id(id)
+  return send_200({}, '/liquors/' + str(id))

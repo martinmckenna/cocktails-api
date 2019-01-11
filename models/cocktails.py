@@ -29,6 +29,10 @@ class Cocktail(db.Model):
         target_cocktail.name = _name
         db.session.commit()
 
+    def delete_cocktail_by_id(_id):
+        Cocktail.query.filter_by(id=_id).delete()
+        db.session.commit()
+
 # Necessary for transforming sqlalchemy data into serialized JSON
 
 
