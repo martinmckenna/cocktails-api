@@ -13,10 +13,8 @@ def get_liquors():
 
 
 def validLiquorObject(liquorObject):
-  if("name" in liquorObject):
-    return True
-  else:
-    return False
+  # return true if we are passed a "name" key in the dictionary
+  return "name" in liquorObject
 
 
 def post_error_payload(error_text="Invalid Payload"):

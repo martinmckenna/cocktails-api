@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request, Response, Blueprint
 
+from utils.set_headers import send_200
+
 from settings import *
 from models.cocktails import *
 import json
@@ -9,14 +11,12 @@ cocktails = Blueprint('cocktails', __name__)
 
 @cocktails.route('/cocktails')
 def get_cocktails():
-  return json.dumps(Cocktail.get_all_cocktails())
+  return send_200(json.dumps(Cocktail.get_all_cocktails()))
 
 
 def validCocktailObject(cocktailObject):
-  if("name" in cocktailObject):
-    return True
-  else:
-    return False
+  # If "name" property is in the JSON object, return true
+  return "name" in cocktailObject
 
 
 def post_error_payload(error_text="Invalid Payload"):
@@ -38,8 +38,6 @@ def add_cocktail():
       return post_error_payload("Invalid JSON")
   if(validCocktailObject(request_data)):
     Cocktail.add_cocktail(request_data['name'])
-    response = Response("", 200, mimetype='application/json')
-    response.headers['Location'] = '/cocktails/'
-    return response
+    return send_200({})
   else:
     return post_error_payload()

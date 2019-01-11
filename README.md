@@ -17,7 +17,7 @@ virtualenv -p python3 your-dir-name-here
 3. Activate the virtualenv
 
 ```bash
-soruce your-dir-name-here/bin/activate
+source your-dir-name-here/bin/activate
 ```
 
 4. Deactivate the virtualenv
@@ -54,6 +54,16 @@ Verify the installation succeeded with
 
 ```bash
 mysql -V
+```
+
+Start MySQL Server
+
+```bash
+brew services start mysql
+```
+
+```bash
+brew services stop mysql
 ```
 
 ### Running the Project
