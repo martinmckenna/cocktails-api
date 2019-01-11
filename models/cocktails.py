@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
-import json
+from flask import Flask
 from settings import db, ma
+
 
 class Cocktail(db.Model):
     __tablename__ = 'cocktails'
@@ -14,17 +14,24 @@ class Cocktail(db.Model):
 
     def get_all_cocktails():
       cocktail_schema = CocktailSchema(strict=True, many=True)
-      output = cocktail_schema.dump(Cocktail.query.all()).data
-      return ({"cocktails": output})
+      return ({
+          "cocktails": cocktail_schema.dump(Cocktail.query.all()).data
+      })
 
-      # def __repr__(self):
-      # return json.dumps({
-      #     'id': self.id,
-      #     'name': self.name
-      # })
+    def get_cocktail_by_id(_id):
+        cocktail_schema = CocktailSchema(strict=True, many=True)
+        return cocktail_schema.dump({
+            Cocktail.query.filter_by(id=_id).first()
+        }).data
 
+    def update_cocktail_by_id(_id, _name):
+        target_cocktail = Cocktail.query.filter_by(id=_id).first()
+        target_cocktail.name = _name
+        db.session.commit()
 
 # Necessary for transforming sqlalchemy data into serialized JSON
+
+
 class CocktailSchema(ma.ModelSchema):
     class Meta:
       model = Cocktail

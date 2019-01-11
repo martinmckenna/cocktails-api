@@ -18,10 +18,7 @@ from models.cocktails import Cocktail
 from models.liquors import Liquor
 
 if not database_exists(url): 
-  print('no database!')
   create_database(url)
-else:
-  print('else')
 
 db.create_all()
 db.session.commit()

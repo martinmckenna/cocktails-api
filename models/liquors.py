@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
-import json
+from flask import Flask
 from settings import db, ma
+
 
 class Liquor(db.Model):
     __tablename__ = 'liquors'
@@ -13,15 +13,21 @@ class Liquor(db.Model):
         db.session.commit()
 
     def get_all_liquors():
-      liquor_schema = LiquorSchema(strict=True, many=True)
-      output = liquor_schema.dump(Liquor.query.all()).data
-      return ({"liquors": output})
+        liquor_schema = LiquorSchema(strict=True, many=True)
+        return ({
+            "liquors": liquor_schema.dump(Liquor.query.all()).data
+        })
 
-      # def __repr__(self):
-      # return json.dumps({
-      #     'id': self.id,
-      #     'name': self.name
-      # })
+    def get_liquor_by_id(_id):
+        liquor_schema = LiquorSchema(strict=True, many=True)
+        return liquor_schema.dump({
+            Liquor.query.filter_by(id=_id).first()
+        }).data
+
+    def update_liquor_by_id(_id, _name):
+        target_liquor = Liquor.query.filter_by(id=_id).first()
+        target_liquor.name = _name
+        db.session.commit()
 
 
 # Necessary for transforming sqlalchemy data into serialized JSON
