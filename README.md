@@ -56,7 +56,7 @@ Verify the installation succeeded with
 mysql -V
 ```
 
-Start MySQL Server
+Start and Stop MySQL Server
 
 ```bash
 brew services start mysql

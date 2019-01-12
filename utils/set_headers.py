@@ -8,7 +8,7 @@ def send_200(data, location='/'):
       status=200,
       mimetype='application/json',
       headers={
-        "location": location
+          "location": location
       }
   )
 
@@ -19,3 +19,16 @@ def send_400(data, location='/'):
         status=400,
         mimetype='application/json'
     )
+
+
+def send_404(location='/'):
+  return Response(
+      json.dumps({
+          'error': 'Entity not found'
+      }),
+      status=404,
+      mimetype='application/json',
+      headers={
+          "location": location
+      }
+  )

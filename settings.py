@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 from models.cocktails import Cocktail
-from models.liquors import Liquor
+from models.ingredients import Ingredient
 
 if not database_exists(url): 
   create_database(url)
