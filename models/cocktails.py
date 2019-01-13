@@ -23,7 +23,7 @@ class Cocktail(db.Model):
       cocktail_schema = CocktailSchema(strict=True, many=True)
       cocktails = Cocktail.query.all()
       # will print kahluha
-      print(cocktails[0].ingredients[0].name)
+      # print(cocktails[0].ingredients[0].name)
 
       try:
         cocktails = Cocktail.query.all()
@@ -52,38 +52,22 @@ class Cocktail(db.Model):
         cocktail_schema = CocktailSchema(strict=True, many=True)
         new_cocktail = Cocktail(name=_name, glass=_glass, finish=_finish)
 
-        # client passes an array of ids (ints)
-        # map over that array
-        # for each, get ingredient by ID
-        # append the ingredient to the cocktail
-        i = 0
-        while i < len(ing_list):
-            # expecting an array of ingredient ids
-            # @todo be able to pass multiple ids
-            ing_to_commit = Ingredient.get_ingredient_by_id(ing_list[i])
-            new_cocktail.ingredients.append(
-                Ingredient.query.filter_by(id=ing_list[i]).first()
-            )
-            i += 1
+        ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
 
-        # handle path of ingredients being empty
-        has_invalid_ingredients = any(
-            eachIngredient
-            is None for eachIngredient
-            in new_cocktail.ingredients
-        )
-        if has_invalid_ingredients is True:
+        if contains_invalid_ingredients(ingredients_to_append) is True:
             return send_400({
                 'error': 'Invalid Payload',
                 'meta': 'Invalid ingredient ID passed'
             }, '/cocktails/')
+        else:
+            new_cocktail.ingredients = ingredients_to_append
 
         db.session.add(new_cocktail)
         db.session.commit()
 
         return send_200(cocktail_schema.dump([new_cocktail]).data, '/cocktails/')
 
-    def update_cocktail_by_id(_id, _name, _glass, implicit_finish_null, _finish=None):
+    def update_cocktail_by_id(_id, _name, _glass, ing_list, implicit_finish_null, _finish=None):
         cocktail_schema = CocktailSchema(strict=True, many=True)
         target_cocktail = Cocktail.query.filter_by(id=_id).first()
 
@@ -96,6 +80,17 @@ class Cocktail(db.Model):
             else False
         )
 
+        # list of ingredients we want to add
+        if ing_list is not None and len(ing_list) != 0:
+            ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
+            if contains_invalid_ingredients(ingredients_to_append) is True:
+                return send_400({
+                    'error': 'Invalid Payload',
+                    'meta': 'Invalid ingredient ID passed'
+                }, '/cocktails/')
+            else:
+                target_cocktail.ingredients = ingredients_to_append
+
         # if client did not supply these keys in the PUT request, don't PUT them
         target_cocktail.name = _name if _name is not None else target_cocktail.name
         target_cocktail.glass = _glass if _glass is not None else target_cocktail.glass
@@ -106,13 +101,43 @@ class Cocktail(db.Model):
 
     def delete_cocktail_by_id(_id):
         try:
-            Cocktail.query.filter_by(id=_id).delete()
+            cocktail_to_delete = Cocktail.query.filter_by(id=_id).first()
+            if cocktail_to_delete is None:
+                return send_404('/cocktails/' + str(_id))
+            db.session.delete(cocktail_to_delete)
             db.session.commit()
+            return send_200({}, '/cocktails/' + str(_id))
         except:
-            send_400({
+            return send_400({
                 'error': 'Something went wrong',
                 'meta': 'Could not delete entry'
             })
+
+
+def generate_ingredients_for_cocktail(ing_list):
+    # client passes an array of ids (ints)
+    # map over that array
+    # for each, get ingredient by ID
+    # append the ingredient to the cocktail
+    i = 0
+    result = []
+    while i < len(ing_list):
+        # expecting an array of ingredient ids
+        # @todo be able to pass multiple ids
+        ing_to_commit = Ingredient.get_ingredient_by_id(ing_list[i])
+        result.append(
+            Ingredient.query.filter_by(id=ing_list[i]).first()
+        )
+        i += 1
+    return result
+
+
+def contains_invalid_ingredients(ing_list):
+    return any(
+        eachIngredient
+        is None for eachIngredient
+        in ing_list
+    )
 
 
 # Necessary for transforming sqlalchemy data into serialized JSON

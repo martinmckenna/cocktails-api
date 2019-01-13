@@ -67,6 +67,7 @@ def update_cocktail(id):
       id,
       value_in_dict_or_none('name', request_data),
       value_in_dict_or_none('glass', request_data),
+      value_in_dict_or_none('ingredients', request_data),
       implicit_finish_null,
       value_in_dict_or_none('finish', request_data),
   )
@@ -74,8 +75,7 @@ def update_cocktail(id):
 
 @cocktails.route('/cocktails/<int:id>', methods=['DELETE'])
 def delete_cocktail(id):
-  Cocktail.delete_cocktail_by_id(id)
-  return send_200({}, '/cocktails/' + str(id))
+  return Cocktail.delete_cocktail_by_id(id)
 
 
 def is_valid_cocktail_object(cocktail_object):
