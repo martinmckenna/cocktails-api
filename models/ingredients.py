@@ -10,10 +10,19 @@ class Ingredient(db.Model):
     name = db.Column(db.String(80), nullable=False)
     ing_type = db.Column(db.String(20), nullable=False)
 
-    def get_all_ingredients():
+    def get_all_ingredients(name=None):
         ingredient_schema = IngredientSchema(strict=True, many=True)
+
         try:
-            ingredients = ingredient_schema.dump(Ingredient.query.all()).data
+            # if the client passed a name to search by, use that
+            # otherise, return all ingredients
+            fetched_ingredients = (
+                Ingredient.query
+                if name is None
+                else Ingredient.query.filter(Ingredient.name.like('%'+name+'%'))
+            )
+            ingredients = ingredient_schema.dump(
+                fetched_ingredients.all()).data
             return send_200({"ingredients": ingredients}, '/ingredients/')
         except:
             send_400({

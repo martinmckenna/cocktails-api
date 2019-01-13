@@ -12,7 +12,9 @@ ingredients = Blueprint('ingredients', __name__)
 
 @ingredients.route('/ingredients')
 def get_ingredients():
-    return Ingredient.get_all_ingredients()
+    # if a ?name="whatever" query string exists
+    name_filter = request.args.get('name')
+    return Ingredient.get_all_ingredients(name_filter)
 
 
 @ingredients.route('/ingredients/<int:id>')
