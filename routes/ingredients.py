@@ -15,6 +15,17 @@ def get_ingredients():
     return send_200(Ingredient.get_all_ingredients(), '/ingredients/')
 
 
+@ingredients.route('/ingredients/<int:id>')
+def get_ingredient(id):
+  ingredient_result = Ingredient.get_ingredient_by_id(id)
+  return (
+      # if result is an array with 1 empty dict, there was no table row found
+      send_404('/ingredients')
+      if len(ingredient_result[0]) == 0
+      else send_200(ingredient_result, '/ingredients/')
+  )
+
+
 def is_valid_ingredient_object(ingredient_object):
   # return true if we are passed "name" and "ing_type" keys in the dictionary
   return "name" in ingredient_object and "ing_type" in ingredient_object

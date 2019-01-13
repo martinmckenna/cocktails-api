@@ -11,28 +11,12 @@ cocktails = Blueprint('cocktails', __name__)
 
 @cocktails.route('/cocktails')
 def get_cocktails():
-  return send_200(Cocktail.get_all_cocktails(), '/cocktails/')
+  return Cocktail.get_all_cocktails()
 
 
-def is_valid_cocktail_object(cocktail_object):
-  return "name" in cocktail_object and "glass" in cocktail_object
-
-
-def is_valid_finish_string(finish, null_allowed=False):
-  # ensure finish is 'shaken' or 'stirred'
-  # also, if we are allowing an implicit None, let the validation pass
-  is_null_and_allowed = True if (
-      finish is None and null_allowed is True) else False
-  return finish == 'shaken' or finish == 'stirred' or is_null_and_allowed
-
-
-def post_error_payload(error_text="Invalid Payload"):
-  return send_400(
-      {
-          "error": error_text,
-          "meta": "Try following this format { 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken' }"
-      }
-  )
+@cocktails.route('/cocktails/<int:id>')
+def get_cocktail(id):
+  return Cocktail.get_cocktail_by_id(id)
 
 
 @cocktails.route('/cocktails', methods=['POST'])
@@ -49,12 +33,12 @@ def add_cocktail():
 
   # finally, if we have the "name" and "glass" keys, update the DB
   if(is_valid_cocktail_object(request_data)):
-    Cocktail.add_cocktail(
+    return Cocktail.add_cocktail(
         request_data['name'],
         request_data['glass'],
+        request_data['ingredients'],
         value_in_dict_or_none('finish', request_data)
     )
-    return send_200({}, '/cocktails/')
   else:
     return post_error_payload()
 
@@ -78,21 +62,52 @@ def update_cocktail(id):
       else False
   )
 
-  # If the ingredient was not found in the DB, send a 404
-  try:
-    Cocktail.update_cocktail_by_id(
-        id,
-        value_in_dict_or_none('name', request_data),
-        value_in_dict_or_none('glass', request_data),
-        implicit_finish_null,
-        value_in_dict_or_none('finish', request_data),
-    )
-  except:
-    return send_404('/cocktails/' + str(id))
-  return send_200(Cocktail.get_cocktail_by_id(id), '/cocktails/' + str(id))
+  # If the cocktail was not found in the DB, send a 404
+  return Cocktail.update_cocktail_by_id(
+      id,
+      value_in_dict_or_none('name', request_data),
+      value_in_dict_or_none('glass', request_data),
+      implicit_finish_null,
+      value_in_dict_or_none('finish', request_data),
+  )
 
 
 @cocktails.route('/cocktails/<int:id>', methods=['DELETE'])
 def delete_cocktail(id):
   Cocktail.delete_cocktail_by_id(id)
   return send_200({}, '/cocktails/' + str(id))
+
+
+def is_valid_cocktail_object(cocktail_object):
+  return (
+      "name" in cocktail_object
+      and "glass" in cocktail_object
+      and "ingredients" in cocktail_object
+      and is_valid_array_of_ingredients(cocktail_object['ingredients'])
+  )
+
+
+def is_valid_finish_string(finish, null_allowed=False):
+  # ensure finish is 'shaken' or 'stirred'
+  # also, if we are allowing an implicit None, let the validation pass
+  is_null_and_allowed = True if (
+      finish is None and null_allowed is True) else False
+  return finish == 'shaken' or finish == 'stirred' or is_null_and_allowed
+
+
+def is_valid_array_of_ingredients(ing_list):
+  return (
+      False
+      if ing_list is None or len(ing_list) == 0
+      else True
+  )
+
+
+def post_error_payload(error_text="Invalid Payload"):
+  return send_400(
+      {
+          "error": error_text,
+          "meta": "Try following this format " +
+          "{ 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken', ing_list: [0, 1] }"
+      }
+  )
