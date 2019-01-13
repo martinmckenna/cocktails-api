@@ -13,9 +13,12 @@ def send_200(data, location='/'):
   )
 
 
-def send_400(data, location='/'):
+def send_400(error, meta="", location='/'):
     return Response(
-        json.dumps(data),
+        json.dumps({
+            "error": error,
+            "meta": meta
+        }),
         status=400,
         mimetype='application/json'
     )

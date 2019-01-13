@@ -11,7 +11,9 @@ cocktails = Blueprint('cocktails', __name__)
 
 @cocktails.route('/cocktails')
 def get_cocktails():
-  return Cocktail.get_all_cocktails()
+  # if a ?name="whatever" query string exists
+  name_filter = request.args.get('name')
+  return Cocktail.get_all_cocktails(name_filter)
 
 
 @cocktails.route('/cocktails/<int:id>')
@@ -103,11 +105,10 @@ def is_valid_array_of_ingredients(ing_list):
   )
 
 
-def post_error_payload(error_text="Invalid Payload"):
+def post_error_payload(error_text="Invalid Payload", path='/'):
   return send_400(
-      {
-          "error": error_text,
-          "meta": "Try following this format " +
-          "{ 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken', ing_list: [0, 1] }"
-      }
+      error_text,
+      "Try following this format " +
+      "{ 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken', ing_list: [0, 1] }",
+      path
   )

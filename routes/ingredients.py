@@ -60,10 +60,5 @@ def is_valid_ingredient_object(ingredient_object):
   return "name" in ingredient_object and "ing_type" in ingredient_object
 
 
-def post_error_payload(error_text="Invalid Payload"):
-  return send_400(
-      {
-          "error": error_text,
-          "meta": "Try following this format { 'name': 'my_ingredient', 'ing_type': 'juice' }"
-      }
-  )
+def post_error_payload(error_text="Invalid Payload", path='/'):
+  return send_400(error_text, "Try following this format { 'name': 'my_ingredient', 'ing_type': 'juice' }", path)

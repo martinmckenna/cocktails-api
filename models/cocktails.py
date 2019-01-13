@@ -1,10 +1,12 @@
 from flask import Flask
 from settings import db, ma
+from sqlalchemy import and_
 
 from models.ing_in_cocktails import ing_in_cocktails
 from models.ingredients import Ingredient, IngredientSchema
 
 from utils.set_headers import send_200, send_400, send_404
+from utils.check_for_duplicate import check_for_duplicate
 
 
 class Cocktail(db.Model):
@@ -18,23 +20,33 @@ class Cocktail(db.Model):
         secondary=ing_in_cocktails,
         backref=db.backref('cocktails', lazy='dynamic')
     )
-
-    def get_all_cocktails():
+  
+    def get_all_cocktails(name=None):
       cocktail_schema = CocktailSchema(strict=True, many=True)
-      cocktails = Cocktail.query.all()
       # will print kahluha
       # print(cocktails[0].ingredients[0].name)
 
+      # this will return a cocktail as long as any of the ingredients are in it
+      # but what we actually want is for a cocktail to be returned ONLY if we have provided
+      # all the ingredients
+      thing = Cocktail.query.join(ing_in_cocktails).filter(ing_in_cocktails.columns.ing_id.in_([1, 2]))
+      print(thing)
+      print(thing.all())
+
       try:
-        cocktails = Cocktail.query.all()
+        # if the client passed a name to search by, use that
+        # otherise, return all cocktails
+        fetched_cocktails = (
+            Cocktail.query
+            if name is None
+            else Cocktail.query.filter(Cocktail.name.like('%'+name+'%'))
+        )
         return send_200({
-            "cocktails": cocktail_schema.dump(cocktails).data
+            "cocktails": cocktail_schema.dump(fetched_cocktails.all()).data
         }, '/cocktails/'
         )
       except:
-        return send_400({
-            'error': 'Error fetching data'
-        }, '/cocktails/')
+        return send_400('Something went wrong', 'Error fetching data', '/cocktails/')
 
     def get_cocktail_by_id(_id):
         cocktail_schema = CocktailSchema(strict=True, many=True)
@@ -52,13 +64,16 @@ class Cocktail(db.Model):
         cocktail_schema = CocktailSchema(strict=True, many=True)
         new_cocktail = Cocktail(name=_name, glass=_glass, finish=_finish)
 
+        # SELECT from ingredients where the name is equal to the passed name
+        # and put inside a list. If list[0] is None, it means this is not a duplicate
+        already_exists = check_for_duplicate(Cocktail, 'name', _name)
+        if already_exists:
+                return send_400('Invalid Payload', 'Cocktail already exists')
+
         ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
 
         if contains_invalid_ingredients(ingredients_to_append) is True:
-            return send_400({
-                'error': 'Invalid Payload',
-                'meta': 'Invalid ingredient ID passed'
-            }, '/cocktails/')
+            return send_400('Invalid payload', 'Invalid ingredient ID passed', '/cocktails/')
         else:
             new_cocktail.ingredients = ingredients_to_append
 
@@ -80,14 +95,17 @@ class Cocktail(db.Model):
             else False
         )
 
+        # SELECT from ingredients where the name is equal to the passed name
+        # and put inside a list. If list[0] is None, it means this is not a duplicate
+        already_exists = check_for_duplicate(Cocktail, 'name', _name)
+        if already_exists:
+                return send_400('Invalid Payload', 'Cocktail already exists')
+
         # list of ingredients we want to add
         if ing_list is not None and len(ing_list) != 0:
             ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
             if contains_invalid_ingredients(ingredients_to_append) is True:
-                return send_400({
-                    'error': 'Invalid Payload',
-                    'meta': 'Invalid ingredient ID passed'
-                }, '/cocktails/')
+                return send_400('Invalid payload', 'Invalid ingredient ID passed', '/cocktails/')
             else:
                 target_cocktail.ingredients = ingredients_to_append
 
@@ -108,10 +126,7 @@ class Cocktail(db.Model):
             db.session.commit()
             return send_200({}, '/cocktails/' + str(_id))
         except:
-            return send_400({
-                'error': 'Something went wrong',
-                'meta': 'Could not delete entry'
-            })
+            return send_400('Something went wrong', 'Could not delete entry', '/cocktails/' + str(_id))
 
 
 def generate_ingredients_for_cocktail(ing_list):
@@ -140,9 +155,8 @@ def contains_invalid_ingredients(ing_list):
     )
 
 
+
 # Necessary for transforming sqlalchemy data into serialized JSON
-
-
 class CocktailSchema(ma.ModelSchema):
     # this is responsible for returning all the ingredient data on the cocktail
     ingredients = ma.Nested(IngredientSchema, many=True, strict=True)

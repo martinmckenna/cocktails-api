@@ -2,6 +2,7 @@ from flask import Flask
 from settings import db, ma
 
 from utils.set_headers import send_200, send_400, send_404
+from utils.check_for_duplicate import check_for_duplicate
 
 
 class Ingredient(db.Model):
@@ -25,10 +26,7 @@ class Ingredient(db.Model):
                 fetched_ingredients.all()).data
             return send_200({"ingredients": ingredients}, '/ingredients/')
         except:
-            send_400({
-                'error': 'Something went wrong',
-                'meta': 'Error fetching data'
-            }, '/ingredients/')
+            return send_400('Something went wrong', 'Error fetching data', '/ingredients/')
 
     def get_ingredient_by_id(_id):
         ingredient_schema = IngredientSchema(strict=True, many=True)
@@ -45,15 +43,18 @@ class Ingredient(db.Model):
     def add_ingredient(_name, _type):
         ingredient_schema = IngredientSchema(strict=True, many=True)
         new_ingredient = Ingredient(name=_name, ing_type=_type)
+
         try:
+            # SELECT from ingredients where the name is equal to the passed name
+            # and put inside a list. If list[0] is None, it means this is not a duplicate
+            already_exists = check_for_duplicate(Ingredient, 'name', _name)
+            if already_exists:
+                return send_400('Invalid Payload', 'Ingredient already exists')
             db.session.add(new_ingredient)
             db.session.commit()
             return send_200(ingredient_schema.dump([new_ingredient]).data, '/ingredients/')
         except:
-            send_400({
-                'error': 'Something went wrong',
-                'meta': 'Error fetching data'
-            }, '/ingredients/')
+            return send_400('Something went wrong', 'Error fetching data', '/ingredients/')
 
     def update_ingredient_by_id(_id, _name, _type):
         ingredient_schema = IngredientSchema(strict=True, many=True)
@@ -62,6 +63,12 @@ class Ingredient(db.Model):
         # ingredient could not be found in the DB
         if target_ingredient is None:
             return send_404('/ingredients/' + str(id))
+
+        # SELECT from ingredients where the name is equal to the passed name
+        # and put inside a list. If list[0] is None, it means this is not a duplicate
+        already_exists = check_for_duplicate(Ingredient, 'name', _name)
+        if already_exists:
+            return send_400('Invalid Payload', 'Ingredient already exists')
 
         # set the new row cells if the client implicitly supplied these values
         target_ingredient.name = _name if _name is not None else target_ingredient.name
@@ -79,13 +86,11 @@ class Ingredient(db.Model):
             db.session.commit()
             return send_200({}, '/ingredients/' + str(_id))
         except:
-            return send_400({
-                'error': 'Something went wrong',
-                'meta': 'Could not delete entry'
-            })
-
+            return send_400('Something went wrong', 'Could not delete entry')
 
 # Necessary for transforming sqlalchemy data into serialized JSON
+
+
 class IngredientSchema(ma.ModelSchema):
     class Meta:
       model = Ingredient
