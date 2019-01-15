@@ -2,6 +2,7 @@ from flask import Flask, request, Response, Blueprint
 
 from utils.set_headers import send_400
 from utils.check_key_in_dict import value_in_dict_or_none
+from utils.convert_to_array import convert_to_array_of_ints
 
 from settings import *
 from models.cocktails import *
@@ -21,19 +22,13 @@ def get_cocktails():
       else False
   )
   try:
-    ing_list_to_array_of_strings = ing_list_filter.split(',')
-    ing_list_as_array_of_ints = [int(i) for i in ing_list_to_array_of_strings]
+    ing_list_as_array_of_ints = (
+        None
+        if ing_list_filter is None
+        else convert_to_array_of_ints(ing_list_filter)
+    )
   except:
-    ing_list_as_array_of_ints = None
-    pass
-
-
-  # check that ing_list exists is an array of ints
-  if (
-      ing_list_as_array_of_ints is not None
-      and not all(isinstance(element, int) for element in ing_list_as_array_of_ints)
-  ):
-    return send_400(meta='ing_list must be an array of numbers')
+    return send_400(meta='ing_list param must be a string of numbers seperated by a string: (e.g: 1,2,3)')
 
   return Cocktail.get_all_cocktails(
       name=name_filter,

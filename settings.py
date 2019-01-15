@@ -10,6 +10,7 @@ url = 'mysql+pymysql://root:PiercetheSQL.14@127.0.0.1/hosting'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.url_map.strict_slashes = False
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
