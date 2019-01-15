@@ -1,6 +1,6 @@
 from flask import Flask, request, Response, Blueprint
 
-from utils.set_headers import send_200, send_400, send_404
+from utils.set_headers import send_400
 from utils.check_key_in_dict import value_in_dict_or_none
 
 from settings import *
@@ -13,7 +13,33 @@ cocktails = Blueprint('cocktails', __name__)
 def get_cocktails():
   # if a ?name="whatever" query string exists
   name_filter = request.args.get('name')
-  return Cocktail.get_all_cocktails(name_filter)
+  ing_list_filter = request.args.get('ing_list')
+  # only set will_shop_filter if the client send "true" in the query string
+  will_shop_filter = (
+      True
+      if request.args.get('will_shop') == 'true'
+      else False
+  )
+  try:
+    ing_list_to_array_of_strings = ing_list_filter.split(',')
+    ing_list_as_array_of_ints = [int(i) for i in ing_list_to_array_of_strings]
+  except:
+    ing_list_as_array_of_ints = None
+    pass
+
+
+  # check that ing_list exists is an array of ints
+  if (
+      ing_list_as_array_of_ints is not None
+      and not all(isinstance(element, int) for element in ing_list_as_array_of_ints)
+  ):
+    return send_400(meta='ing_list must be an array of numbers')
+
+  return Cocktail.get_all_cocktails(
+      name=name_filter,
+      will_shop=will_shop_filter,
+      ing_list=ing_list_as_array_of_ints,
+  )
 
 
 @cocktails.route('/cocktails/<int:id>')

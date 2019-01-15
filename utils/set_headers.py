@@ -13,7 +13,7 @@ def send_200(data, location='/'):
   )
 
 
-def send_400(error, meta="", location='/'):
+def send_400(error="Invalid Payload", meta="", location='/'):
     return Response(
         json.dumps({
             "error": error,

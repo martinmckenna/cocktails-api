@@ -1,7 +1,7 @@
 from flask import Flask
 import json
 from settings import db, ma
-from sqlalchemy import and_
+from sqlalchemy import and_, exists
 
 from models.ing_in_cocktails import CocktailIngredient, CocktailIngredientSchema
 from models.ingredients import Ingredient, IngredientSchema
@@ -18,29 +18,65 @@ class Cocktail(db.Model):
     finish = db.Column(db.String(20), nullable=True)
     ingredients = db.relationship(
         'CocktailIngredient',
-        # secondary='ings_in_cocktail',
         backref=db.backref('cocktails', lazy='joined'),
         cascade='all, delete-orphan'
-        # primaryjoin=id == CocktailIngredient.cocktail_id
     )
 
-    def get_all_cocktails(name=None):
-      cocktail_schema = CocktailSchema(strict=True, many=True)
+    def get_all_cocktails(name=None, ing_list=None, will_shop=False):
+      """
+      gets all cocktails from cocktails DB along with the ingredients
+      that go into the cocktail
 
-      # this will return a cocktail as long as any of the ingredients are in it
-      # but what we actually want is for a cocktail to be returned ONLY if we have provided
-      # all the ingredients
-      # thing = Cocktail.query.join(CocktailIngredient).filter(CocktailIngredient.ing_id.in_([3]))
-      # print(thing)
-      # print(cocktail_schema.dump(thing.all()).data)
+      @param name: name of the cocktail to filter by (can be a partial match)
+      
+      @param ing_list: ingredients to filter by
+
+      @param will_shop: if the client is willing to shop for more ingredients to make a
+      cocktail. If this param is True and if the client passes "Gin" in the ing_list argument,
+      then "Gin and Tonic" will return because the client is willing to go shopping for tonic.
+      If False, passing "Gin" will not return "Gin And Tonic"
+      """
+      cocktail_schema = CocktailSchema(strict=True, many=True)
+      base_query = Cocktail.query
+
+      """
+      check to see if client passed an ing_list to filter by
+      and if they want more suggestions for cocktails that contain
+      ingredients they don't own
+      """
+      if(ing_list is not None and will_shop is True):
+          """
+          this will return a cocktail as long as any of the ingredients passed are in the cocktail.
+          So for example, if the client passed "Gin," then "Gin and Tonic" will return
+          """
+          base_query = Cocktail.query.join(
+              CocktailIngredient
+          ).filter(CocktailIngredient.ing_id.in_(ing_list))
+
+      elif(ing_list is not None and will_shop is False):
+          """
+          this query will return a cocktail as long as the correct ingredients
+          are passed. So for example, if the client passes 'Gin', 'Tonic', the
+          "Gin and Tonic" cocktail will return. If the client only passes 'Gin',
+          nothing will return. It's also worth nothing that if the client passes
+          'Gin', 'Tonic', and 'Whiskey', 'Gin and Tonic' will still return
+          """
+          base_query = db.session.query(Cocktail).filter(
+              ~exists().where(
+                  and_(
+                      CocktailIngredient.cocktail_id == Cocktail.id,
+                      ~CocktailIngredient.ing_id.in_(ing_list)
+                  )
+              )
+          )
 
       try:
         # if the client passed a name to search by, use that
         # otherise, return all cocktails
         fetched_cocktails = (
-            Cocktail.query
+            base_query
             if name is None
-            else Cocktail.query.filter(Cocktail.name.like('%'+name+'%'))
+            else base_query.filter(Cocktail.name.like('%'+name+'%'))
         )
         return send_200({
             "cocktails": cocktail_schema.dump(fetched_cocktails.all()).data
@@ -143,7 +179,7 @@ class Cocktail(db.Model):
         return send_200({}, '/cocktails/' + str(_id))
         # try:
         # except:
-            # return send_400('Something went wrong', 'Could not delete entry', '/cocktails/' + str(_id))
+        # return send_400('Something went wrong', 'Could not delete entry', '/cocktails/' + str(_id))
 
 
 def generate_ingredients_for_cocktail(ing_list):
@@ -160,7 +196,8 @@ def generate_ingredients_for_cocktail(ing_list):
     i = 0
     result = []
     while i < len(ing_list):
-        ing_to_commit = Ingredient.query.filter_by(id=ing_list[i].get('id')).first()
+        ing_to_commit = Ingredient.query.filter_by(
+            id=ing_list[i].get('id')).first()
         (
             result.append(
                 CocktailIngredient(

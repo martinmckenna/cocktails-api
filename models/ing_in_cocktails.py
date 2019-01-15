@@ -6,7 +6,7 @@ from models.ingredients import Ingredient, IngredientSchema
 
 class CocktailIngredient(db.Model):
     __tablename__ = 'ings_in_cocktail'
-    ing_id = db.Column(db.Integer, db.ForeignKey('ingredients.id', ondelete='CASCADE'), primary_key=True)
+    ing_id = db.Column(db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
     cocktail_id = db.Column(db.Integer, db.ForeignKey('cocktails.id'), primary_key=True)
     ounces = db.Column(db.Float, nullable=False)
     action = db.Column(db.String(20), nullable=False)
