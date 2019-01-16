@@ -74,6 +74,23 @@ Run the following while `cd`ed into the project root
 python3 app.py
 ```
 
+## Using the API
+
+The following endpoints are available
+
+| Endpoints       | Usage          | Request Body Params         | Query Params         |
+|-----------------|----------------|----------------|----------------|
+| `GET /cocktails` | Get all of the cocktails available. |  | **name** - [string] filter by name of the cocktail **ing_list** - [comma seperated Ints] a list of ingredients that you want to request cocktails for. Please note that if you provide the ID for "Gin," for example, "Gin and Tonic" will not be returned becasue you need to provide ALL ingredients. This can be altered with the `will_shop` param <br><br> **will_shop** - ["true" or "false"] in conjunction with the `ing_list` param, returns a list of cocktails that match some ingredients passed. So "Gin and Tonic" will return if you pass the ID for "Gin" in the `ing_list` param and this param is set to "true" |
+| `GET /cocktail/:id` | Get a particular cocktail. |  |  |
+| `POST /cocktails` | Add a new cocktail to the DB. | **name** - [String] The name of the cocktail <br> **glass** - [String] What glass is the cocktail served in? <br> **finish** - ["shaken" or "stirred" or null] Self-explanatory <br> **Ingredients** - [Array of Objects] Each object must contain the following keys <br> <ul><li>**id** - [Int] the id of the ingredient</li><li>**ounces** - [Float] how many ounces does this ingredient use?</li><li>**step** - [Int] what step does this ingredient come in the cocktail recipie?</li><li>**action** - [String] what action do you perform with this ingredient? Examples include "muddle", "add", "squeeze"</li></ul>   | |
+| `PUT /cocktails/:id` | Update a particular cocktail. | Same as POST /cocktails | |
+| `DELETE /cocktails/:id` | Delete a cocktail | | |
+| `GET /ingredients` | Get all of the ingredients available | | **name** - [String] filter ingredients list by name |
+| `GET /ingredients/:id` | Get a particular ingredient | | |
+| `POST /ingredients` | Add a new ingredient to the DB | **name** - [String] name of the ingredient <br> **ing_type** - [string] What type of ingredient is this? Examples include "liquor", "fruit", "juice" | |
+| `PUT /ingredients/:id` | Update an ingredient | same as POST /ingredients | |
+| `DELETE /ingredients/:id` | Delete an ingredient | | |
+
 
 
 

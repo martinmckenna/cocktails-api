@@ -2,6 +2,7 @@ from flask import Flask
 import json
 from settings import db, ma
 from sqlalchemy import and_, exists
+from marshmallow import fields
 
 from models.ing_in_cocktails import CocktailIngredient, CocktailIngredientSchema
 from models.ingredients import Ingredient, IngredientSchema
@@ -70,20 +71,20 @@ class Cocktail(db.Model):
               )
           )
 
-      try:
-        # if the client passed a name to search by, use that
-        # otherise, return all cocktails
-        fetched_cocktails = (
-            base_query
-            if name is None
-            else base_query.filter(Cocktail.name.like('%'+name+'%'))
-        )
-        return send_200({
-            "cocktails": cocktail_schema.dump(fetched_cocktails.all()).data
-        }, '/cocktails/'
-        )
-      except:
-        return send_400('Something went wrong', 'Error fetching data', '/cocktails/')
+      # if the client passed a name to search by, use that
+      # otherise, return all cocktails
+      fetched_cocktails = (
+          base_query
+          if name is None
+          else base_query.filter(Cocktail.name.like('%'+name+'%'))
+      )
+      return send_200({
+          "cocktails": cocktail_schema.dump(fetched_cocktails.all()).data
+      }, '/cocktails/'
+      )
+    #   try:
+    #   except:
+        # return send_400('Something went wrong', 'Error fetching data', '/cocktails/')
 
     def get_cocktail_by_id(_id):
         cocktail_schema = CocktailSchema(strict=True, many=True)
@@ -245,6 +246,55 @@ def contains_invalid_ingredients(ing_list):
 class CocktailSchema(ma.ModelSchema):
     # this is responsible for returning all the ingredient data on the cocktail
     ingredients = ma.Nested(CocktailIngredientSchema, many=True, strict=True)
+    ingredients = fields.Method('concat_ingredients_dicts')
+
+    """
+    at this point the ingredients field on the cocktail object looks something like this
+
+    ingredients: [{
+        ingredient: {
+            name: 'white russian',
+            glass: 'rocks',
+            finish: 'stirred'
+        },
+        ounces: 2,
+        action: 'muddle',
+        step: 1
+    }]
+
+    what we want is to concat this data so "ingredients" just turns
+    into an list of dicts
+    """
+    def concat_ingredients_dicts(self, obj):
+        result_ingredients_list = []
+        i = 0
+        while i < len(list(obj.ingredients)):
+            # create a dict from the fields that live in the relational table
+            relational_fields_dict = {
+                'ounces': obj.ingredients[i].ounces,
+                'action': obj.ingredients[i].action,
+                'step': obj.ingredients[i].step
+            }
+
+            # create a dict from the fields on each ingredient in the cocktail
+            ingredients_dict = obj.ingredients[i].ingredient.__dict__
+            ingredients_dict_extracted_values = {
+                'name': ingredients_dict.get('name'),
+                'type': ingredients_dict.get('ing_type'),
+                'id': ingredients_dict.get('id')
+            }
+
+            # merge the two dicts together
+            merged = dict()
+            merged.update(ingredients_dict_extracted_values)
+            merged.update(relational_fields_dict)
+
+            # append this merged dict a result array
+            result_ingredients_list.append(merged)
+            i += 1
+        # return the array of ingredients
+        return result_ingredients_list
 
     class Meta:
       model = Cocktail
+

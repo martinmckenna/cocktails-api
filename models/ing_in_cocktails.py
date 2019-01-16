@@ -21,13 +21,7 @@ class CocktailIngredient(db.Model):
 
 
 class CocktailIngredientSchema(ma.ModelSchema):
-    action = fields.String()
     ingredient = ma.Nested(IngredientSchema, strict=True)
-    # ingredient = fields.Method("get_ingredients")
-
-    # def get_ingredients(self, obj):
-    #     print(obj.ingredients)
-    #     return {**obj, **obj.ingredient}
 
     class Meta:
       model = CocktailIngredient
