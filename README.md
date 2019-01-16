@@ -78,8 +78,8 @@ python3 app.py
 
 The following endpoints are available
 
-| Endpoints       | Request Body Params         | Query Params         |
-|-----------------|----------------|----------------|
+| Endpoints | Request Body Params | Query Params |
+|-----------|--------------------|---------------|
 | `GET /cocktails` |  | **name** - [string] filter by name of the cocktail <br><br> **ing_list** - [comma seperated Ints] a list of ingredients that you want to request cocktails for. Please note that if you provide the ID for "Gin," for example, "Gin and Tonic" will not be returned becasue you need to provide ALL ingredients. This can be altered with the `will_shop` param <br><br> **will_shop** - ["true" or "false"] in conjunction with the `ing_list` param, returns a list of cocktails that match some ingredients passed. So "Gin and Tonic" will return if you pass the ID for "Gin" in the `ing_list` param and this param is set to "true" |
 | `GET /cocktail/:id` |  |
 | `POST /cocktails` | **name** - [String] The name of the cocktail <br> **glass** - [String] What glass is the cocktail served in? <br> **finish** - ["shaken" or "stirred" or null] Self-explanatory <br> **Ingredients** - [Array of Objects] Each object must contain the following keys <br> <ul><li>**id** - [Int] the id of the ingredient</li><li>**ounces** - [Float] how many ounces does this ingredient use?</li><li>**step** - [Int] what step does this ingredient come in the cocktail recipie?</li><li>**action** - [String] what action do you perform with this ingredient? Examples include "muddle", "add", "squeeze"</li></ul>   |
