@@ -1,5 +1,6 @@
 from flask import Flask
 from settings import db, ma
+import re
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from marshmallow import fields
@@ -63,6 +64,16 @@ class User(db.Model):
     already_exists = check_for_duplicate(User, 'name', _name)
     if already_exists:
         return send_400('Invalid Payload', 'User already exists')
+
+    strong_password_pattern = re.compile(
+        r'(?=^.{8,}$)(?=.*\d)(?=.*[!@#$%^&*.,]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$'
+    )
+    if not strong_password_pattern.match(_password):
+      return send_400(
+          meta='Password too weak. Enter a password of at least 8 characters containing one ' +
+          'lowercase letter, one uppercase letter, a number, and one of the following special ' +
+          'characters: ! @ $ % ^ & * . ,'
+      )
 
     hashed_password = generate_password_hash(_password, method='sha256')
 
