@@ -14,7 +14,7 @@ from utils.check_for_duplicate import check_for_duplicate
 class Cocktail(db.Model):
     __tablename__ = 'cocktails'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.String(80), nullable=False, unique=True)
     glass = db.Column(db.String(20), nullable=False)
     finish = db.Column(db.String(20), nullable=True)
     ingredients = db.relationship(

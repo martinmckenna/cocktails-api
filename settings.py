@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 url = 'mysql+pymysql://root:PiercetheSQL.14@127.0.0.1/hosting'
 
+app.config['SECRET_KEY'] = 'thisissecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.url_map.strict_slashes = False
@@ -17,6 +18,7 @@ ma = Marshmallow(app)
 
 from models.cocktails import Cocktail
 from models.ingredients import Ingredient
+from models.users import User
 
 if not database_exists(url): 
   create_database(url)

@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, request, Response, Blueprint
+from flask import Flask, request, Response, Blueprint
 
-from utils.set_headers import send_200, send_400, send_404
+from utils.set_headers import send_400
 from utils.check_key_in_dict import value_in_dict_or_none
 
 from settings import *

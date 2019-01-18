@@ -35,3 +35,16 @@ def send_404(location='/'):
           "location": location
       }
   )
+
+
+def send_401(location='/'):
+    return Response(
+        json.dumps({
+            'error': 'Unauthorized',
+            'meta': 'You do not have privledges to perform this action'
+        }),
+        status=401,
+        headers={
+            'location': location
+        }
+    )

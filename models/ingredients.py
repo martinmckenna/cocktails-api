@@ -8,7 +8,7 @@ from utils.check_for_duplicate import check_for_duplicate
 class Ingredient(db.Model):
     __tablename__ = 'ingredients'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.String(80), nullable=False, unique=True)
     ing_type = db.Column(db.String(20), nullable=False)
 
     def get_all_ingredients(name=None):
@@ -37,7 +37,7 @@ class Ingredient(db.Model):
             # if result is an array with 1 empty dict, there was no table row found
             send_404('/ingredients/')
             if len(fetched_ingredient[0]) == 0
-            else send_200(fetched_ingredient, '/ingredients/')
+            else send_200(fetched_ingredient[0], '/ingredients/')
         )
 
     def add_ingredient(_name, _type):
@@ -52,7 +52,7 @@ class Ingredient(db.Model):
                 return send_400('Invalid Payload', 'Ingredient already exists')
             db.session.add(new_ingredient)
             db.session.commit()
-            return send_200(ingredient_schema.dump([new_ingredient]).data, '/ingredients/')
+            return send_200(ingredient_schema.dump([new_ingredient]).data[0], '/ingredients/')
         except:
             return send_400('Something went wrong', 'Error fetching data', '/ingredients/')
 
@@ -75,7 +75,7 @@ class Ingredient(db.Model):
         target_ingredient.ing_type = _type if _type is not None else target_ingredient.ing_type
         db.session.commit()
 
-        return send_200(ingredient_schema.dump([target_ingredient]).data, '/ingredients/' + str(_id))
+        return send_200(ingredient_schema.dump([target_ingredient]).data[0], '/ingredients/' + str(_id))
 
     def delete_ingredient_by_id(_id):
         try:
