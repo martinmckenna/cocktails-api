@@ -1,6 +1,5 @@
 from flask import Flask
 from settings import db, ma
-from marshmallow import fields
 
 from models.cocktails import Cocktail, CocktailSchema
 

@@ -9,6 +9,7 @@ from models.ingredients import Ingredient, IngredientSchema
 
 from utils.set_headers import send_200, send_400, send_404
 from utils.check_for_duplicate import check_for_duplicate
+from utils.validate_array import list_contains_none_elements
 
 
 class Cocktail(db.Model):
@@ -95,7 +96,7 @@ class Cocktail(db.Model):
             # if result is an array with 1 empty dict, there was no table row found
             send_404('/cocktails/')
             if len(fetched_cocktail[0]) == 0
-            else send_200(fetched_cocktail, '/cocktails/')
+            else send_200(fetched_cocktail[0], '/cocktails/')
         )
 
     def add_cocktail(_name, _glass, ing_list, _finish=None):
@@ -117,7 +118,7 @@ class Cocktail(db.Model):
 
         ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
 
-        if contains_invalid_ingredients(ingredients_to_append) is True:
+        if list_contains_none_elements(ingredients_to_append) is True:
             return send_400('Invalid payload', 'Invalid ingredient ID passed', '/cocktails/')
         else:
             new_cocktail.ingredients = ingredients_to_append
@@ -148,7 +149,7 @@ class Cocktail(db.Model):
 
         # list of ingredients we want to add
         # check to see if client has passed ing_list and is not an empty array
-        if ing_list is not None and len(ing_list) != 0:
+        if ing_list is not None and type(ing_list) is list and len(ing_list) != 0:
            # ensure the ingredients is a list of dicts with the valid keys
             if not ing_list_is_valid(ing_list):
               return send_400(
@@ -158,7 +159,7 @@ class Cocktail(db.Model):
               )
 
             ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
-            if contains_invalid_ingredients(ingredients_to_append) is True:
+            if list_contains_none_elements(ingredients_to_append) is True:
                 return send_400('Invalid payload', 'Invalid ingredient ID passed', '/cocktails/')
             else:
                 target_cocktail.ingredients = ingredients_to_append
@@ -169,7 +170,7 @@ class Cocktail(db.Model):
         target_cocktail.finish = _finish if should_set_finish else target_cocktail.finish
         db.session.commit()
 
-        return send_200(cocktail_schema.dump([target_cocktail]).data, '/cocktails/' + str(_id))
+        return send_200(cocktail_schema.dump([target_cocktail]).data[0], '/cocktails/' + str(_id))
 
     def delete_cocktail_by_id(_id):
         cocktail_to_delete = Cocktail.query.filter_by(id=_id).first()
@@ -218,6 +219,7 @@ def generate_ingredients_for_cocktail(ing_list):
 def ing_list_is_valid(ing_list):
   # checks to see if the list of ingredients is made up
   # of a dicts that have the following keys: id, ounces, action, and step
+
   results = []
   i = 0
   while i < len(ing_list):
@@ -232,14 +234,6 @@ def ing_list_is_valid(ing_list):
     )
     i += 1
   return all(results)
-
-
-def contains_invalid_ingredients(ing_list):
-    return any(
-        eachIngredient
-        is None for eachIngredient
-        in ing_list
-    )
 
 
 # Necessary for transforming sqlalchemy data into serialized JSON

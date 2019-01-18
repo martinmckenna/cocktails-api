@@ -27,6 +27,8 @@ def get_users(current_user):
 @users.route('/users/<string:id>')
 @token_required
 def get_user(current_user, id):
+  if not current_user.admin and not current_user.public_id == id:
+    return send_401('/users/' + str(id))
   return User.get_user_by_id(id)
 
 
@@ -38,7 +40,7 @@ def create_user():
   except:
       return post_error_payload("Invalid JSON")
 
-  if not is_valid_user_object(request_data):
+  if request_data is None or not is_valid_user_object(request_data):
     return post_error_payload()
 
   """
@@ -48,17 +50,37 @@ def create_user():
   return User.add_new_user(_name=request_data['name'], _password=request_data['password'])
 
 
+@users.route('/users/<string:id>', methods=['PUT'])
+@token_required
+def add_user_favorite(current_user, id):
+  # only allow a user to add a favorite for themselves, unless they're an admin
+  if not current_user.admin and not current_user.public_id == id:
+    return send_401('/users/')
+
+  # check for valid JSON
+  try:
+    request_data = request.get_json()
+  except:
+    return put_error_payload("Invalid JSON")
+
+  if request_data is None or not "cocktails" in request_data and is_valid_put_object(request_data):
+    return put_error_payload()
+
+  # at this point, we know we have an array of something
+  return User.add_cocktail_to_user(id, value_in_dict_or_none('cocktails', request_data))
+
+
 @users.route('/users/<string:id>/promote', methods=['PUT'])
 @token_required
 def update_user(current_user, id):
   if not current_user.admin:
     return send_401('/users/' + str(id) + '/promote/')
-  return User.update_user_by_id(id)
+  return User.promote_user_by_id(id)
 
 
 @users.route('/users/<string:id>', methods=['DELETE'])
 @token_required
-def delete_user(id):
+def delete_user(current_user, id):
   # only allow a user to delete themselves
   if not current_user.admin and not current_user.public_id == id:
     return send_401('/users/')
@@ -96,5 +118,17 @@ def is_valid_user_object(user_object):
   return "name" in user_object and "password" in user_object
 
 
+def is_valid_put_object(put_object):
+    return (
+        False
+        if put_object is None or len(put_object) == 0
+        else True
+    )
+
+
 def post_error_payload(error_text="Invalid Payload", path='/'):
   return send_400(error_text, "Try following this format { 'name': 'my_username', 'password': 'asdf123!' }", path)
+
+
+def put_error_payload(error_text='Invalid Payload', path=''):
+  return send_400(error_text, meta="Try following this format { 'cocktails': [1, 2, 3] }")

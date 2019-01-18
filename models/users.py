@@ -2,11 +2,14 @@ from flask import Flask
 from settings import db, ma
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
+from marshmallow import fields
 
 from utils.set_headers import send_400, send_200, send_404
 from utils.check_for_duplicate import check_for_duplicate
+from utils.validate_array import is_array_of_ints, list_contains_none_elements
 
 from models.user_favorites import UserFavorites, UserFavoritesSchema
+from models.cocktails import Cocktail
 
 
 class User(db.Model):
@@ -75,7 +78,31 @@ class User(db.Model):
 
     return send_200(user_schema.dump([new_user]).data[0], '/users/')
 
-  def update_user_by_id(_id):
+  def add_cocktail_to_user(_pub_id, list_of_cocktails):
+    user_schema = UserSchema(strict=True, many=True)
+    
+    fetched_user = User.query.filter_by(public_id=_pub_id).first()
+      
+    # user not found
+    if fetched_user is None:
+      return send_404('/user/' + str(_id))
+
+    # validate we have an array of ints
+    if not is_array_of_ints(list_of_cocktails):
+      return send_400(meta="Please match the following format: { 'cocktails': [1, 2, 3] }")
+
+    # validate each cocktail id exists in the DB
+    cocktails_to_commit = User.generate_cocktails_to_add_to_user(list_of_cocktails)
+    if list_contains_none_elements(cocktails_to_commit) is True:
+      return send_400('Invalid payload', 'Invalid cocktail ID passed', '/users/')
+    else:
+      fetched_user.favorites = cocktails_to_commit
+      db.session.commit()
+
+
+    return send_200(user_schema.dump([fetched_user]).data, '/users/' + str(_pub_id))
+
+  def promote_user_by_id(_id):
     user_schema = UserSchema(strict=True, many=True)
     """
     currently only has one feature - to promote user
@@ -106,12 +133,58 @@ class User(db.Model):
     except:
       return send_400('Something went wrong', 'Could not delete entry')
 
+  def generate_cocktails_to_add_to_user(list_of_ids):
+    """
+    client passes an array of ints - by now, we've validated that
+    we need to iterate over this list, get the cocktail from the DB
+    and append it to a result array or None if the cocktail doesn't exist
+    """
+
+    i = 0
+    result = []
+    while i < len(list_of_ids):
+      cocktail_to_add = Cocktail.query.filter_by(
+          id=list_of_ids[i]).first()
+      (
+          result.append(
+              UserFavorites(
+                  cocktail_id=list_of_ids[i],
+              )
+          )
+          if cocktail_to_add is not None
+          else result.append(None)
+      )
+      i += 1
+    return result
+
 # Necessary for transforming sqlalchemy data into serialized JSON
 
 
 class UserSchema(ma.ModelSchema):
     # this is responsible for returning all the favorites on the user payload
     favorites = ma.Nested(UserFavoritesSchema, many=True, strict=True)
+    favorites = fields.Method('concat_cocktail_dicts')
+
+    def concat_cocktail_dicts(self, obj):
+        result_list = []
+        i = 0
+        while (i < len(obj.favorites)):
+          result_list.append({
+            'id': obj.favorites[i].cocktail.id,
+            'name': obj.favorites[i].cocktail.name,
+            'finish': obj.favorites[i].cocktail.finish,
+            'glass': obj.favorites[i].cocktail.glass
+          })
+          i += 1
+        
+        return result_list
+
+        # return {
+        #     'name': obj.favorites.cocktail.name,
+        #     'finish': obj.favorites.cocktail.finish,
+        #     'glass': obj.favorites.cocktail.glass
+        # }
 
     class Meta:
       model = User
+      

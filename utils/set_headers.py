@@ -37,10 +37,10 @@ def send_404(location='/'):
   )
 
 
-def send_401(location='/'):
+def send_401(error='Unauthorized', location='/'):
     return Response(
         json.dumps({
-            'error': 'Unauthorized',
+            'error': error,
             'meta': 'You do not have privledges to perform this action'
         }),
         status=401,

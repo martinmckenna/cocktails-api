@@ -2,6 +2,7 @@ from flask import Flask, request, Response, Blueprint
 
 from utils.set_headers import send_400
 from utils.check_key_in_dict import value_in_dict_or_none
+from utils.decorators import token_required
 
 from settings import *
 from models.ingredients import *
@@ -23,24 +24,33 @@ def get_ingredient(id):
 
 
 @ingredients.route('/ingredients', methods=['POST'])
-def add_ingredient():
+@token_required
+def add_ingredient(current_user):
+  if not current_user.admin:
+    return send_401('/users/')
   try:
       request_data = request.get_json()
   except:
       return post_error_payload("Invalid JSON")
 
-  if(is_valid_ingredient_object(request_data)):
-    return Ingredient.add_ingredient(request_data['name'], request_data['ing_type'])
-  else:
+  if request_data is None or not is_valid_ingredient_object(request_data):
     return post_error_payload()
+
+  return Ingredient.add_ingredient(request_data['name'], request_data['ing_type'])
 
 
 @ingredients.route('/ingredients/<int:id>', methods=['PUT'])
-def update_ingredient(id):
+@token_required
+def update_ingredient(current_user, id):
+  if not current_user.admin:
+    return send_401('/users/')
   try:
     request_data = request.get_json()
   except:
     return post_error_payload("Invalid JSON")
+
+  if request_data is None:
+    return post_error_payload('Invalid JSON')
 
   # If the ingredient was not found in the DB, send a 404
   return Ingredient.update_ingredient_by_id(
@@ -51,7 +61,11 @@ def update_ingredient(id):
 
 
 @ingredients.route('/ingredients/<int:id>', methods=['DELETE'])
-def delete_ingredient(id):
+@token_required
+def delete_ingredient(current_user, id):
+  if not current_user.admin:
+    return send_401('/users/')
+    
   return Ingredient.delete_ingredient_by_id(id)
 
 

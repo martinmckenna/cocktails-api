@@ -1,8 +1,9 @@
 from flask import Flask, request, Response, Blueprint
 
-from utils.set_headers import send_400
+from utils.set_headers import send_400, send_401
 from utils.check_key_in_dict import value_in_dict_or_none
 from utils.convert_to_array import convert_to_array_of_ints
+from utils.decorators import token_required
 
 from settings import *
 from models.cocktails import *
@@ -43,7 +44,10 @@ def get_cocktail(id):
 
 
 @cocktails.route('/cocktails', methods=['POST'])
-def add_cocktail():
+@token_required
+def add_cocktail(current_user):
+  if not current_user.admin:
+    return send_401('/users/')
   # check for valid JSON
   try:
       request_data = request.get_json()
@@ -51,8 +55,10 @@ def add_cocktail():
       return post_error_payload("Invalid JSON")
 
   # if the user passed a "finish" key, make sure it's value is correct
-  if 'finish' in request_data and not is_valid_finish_string(request_data['finish']):
+  if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish']):
     return post_error_payload("The 'finish' key must either be 'shaken' or 'stirred'")
+
+  print('hello worlds')
 
   # finally, if we have the "name" and "glass" keys, update the DB
   if(is_valid_cocktail_object(request_data)):
@@ -67,14 +73,17 @@ def add_cocktail():
 
 
 @cocktails.route('/cocktails/<int:id>', methods=['PUT'])
-def update_cocktail(id):
+@token_required
+def update_cocktail(current_user, id):
+  if not current_user.admin:
+    return send_401('/users/')
   try:
     request_data = request.get_json()
   except:
     return post_error_payload("Invalid JSON")
 
   # if the user passed a "finish" key, make sure it's value is correct
-  if 'finish' in request_data and not is_valid_finish_string(request_data['finish'], True):
+  if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish'], True):
     return post_error_payload("The 'finish' key must either be 'shaken' or 'stirred'")
 
   # allow the client to implicitly change the finish to "null"
@@ -97,7 +106,10 @@ def update_cocktail(id):
 
 
 @cocktails.route('/cocktails/<int:id>', methods=['DELETE'])
-def delete_cocktail(id):
+@token_required
+def delete_cocktail(current_user, id):
+  if not current_user.admin:
+    return send_401('/users/')
   return Cocktail.delete_cocktail_by_id(id)
 
 
@@ -121,7 +133,7 @@ def is_valid_finish_string(finish, null_allowed=False):
 def is_valid_array_of_ingredients(ing_list):
   return (
       False
-      if ing_list is None or len(ing_list) == 0
+      if type(ing_list) is not list or ing_list is None or len(ing_list) == 0
       else True
   )
 
@@ -130,6 +142,6 @@ def post_error_payload(error_text="Invalid Payload", path='/'):
   return send_400(
       error_text,
       "Try following this format " +
-      "{ 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken', ing_list: [0, 1] }",
+      "{ 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken', ing_list: [{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }] }",
       path
   )
