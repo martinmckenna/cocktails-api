@@ -96,7 +96,7 @@ class User(db.Model):
       
     # user not found
     if fetched_user is None:
-      return send_404('/user/' + str(_id))
+      return send_404('/user/' + str(_pub_id))
 
     # validate we have an array of ints
     if not is_array_of_ints(list_of_cocktails):
