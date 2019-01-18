@@ -96,7 +96,7 @@ The following endpoints are available
 | `DELETE /users/:public_id` | |
 | `PUT /users/:pub_id` | **cocktails** - [List of Ints] array of ints that match with the cocktails this user wants to favorite | |
 | `PUT /users/:public_id/promote`| |
-| `GET /login` | | **Basic Authentication**
+| `GET /login` | | **Basic Authentication** - gives you an auth token that lasts 30 minutes
 
 
 
