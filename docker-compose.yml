@@ -54,8 +54,6 @@ services:
     build: ./
     links:
       - db
-    ports:
-      - "5000:5000"
     environment:
       - VIRTUAL_HOST=api.atmarty.com
       - VIRTUAL_NETWORK=nginx-proxy
