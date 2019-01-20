@@ -10,6 +10,7 @@ services:
       MYSQL_USER: marty
       MYSQL_PASSWORD: h&PT93QX6SibJf#
   app:
+    restart: always
     build: ./
     links:
       - db
