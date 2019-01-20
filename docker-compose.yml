@@ -25,6 +25,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - VIRTUAL_HOST=172.104.208.119
+      - VIRTUAL_HOST=api.atmarty.com
+      - VIRTUAL_PROTO=https
+      - VIRTUAL_PORT=443
 volumes:
   my-datavolume:
