@@ -1,11 +1,5 @@
 version: "2"
 services:
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    ports:
-      - "80:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
   db:
     image: mysql:5.7
     ports:
@@ -24,9 +18,5 @@ services:
       - db
     ports:
       - "5000:5000"
-    environment:
-      - VIRTUAL_HOST=api.atmarty.com
-      - VIRTUAL_PROTO=https
-      - VIRTUAL_PORT=443
 volumes:
   my-datavolume:
