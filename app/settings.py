@@ -6,7 +6,9 @@ from sqlalchemy_utils import create_database, database_exists
 
 app = Flask(__name__)
 
-url = 'mysql+pymysql://root:PiercetheSQL.14@127.0.0.1/hosting'
+url = 'mysql+pymysql://marty:h&PT93QX6SibJf#@db:3306/drinks'
+
+# url = 'mysql+pymysql://root:PiercetheSQL.14@127.0.0.1/hosting'
 
 app.config['SECRET_KEY'] = 'thisissecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = url
@@ -25,4 +27,3 @@ if not database_exists(url):
 
 db.create_all()
 db.session.commit()
-

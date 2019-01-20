@@ -8,4 +8,4 @@ app.register_blueprint(cocktails)
 app.register_blueprint(ingredients)
 app.register_blueprint(users)
 
-app.run(port=5000, debug=True)
+app.run(host='0.0.0.0')

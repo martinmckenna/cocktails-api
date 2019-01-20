@@ -1,0 +1,17 @@
+version: "2"
+services:
+  db:
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_DATABASE: drinks
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: marty
+      MYSQL_PASSWORD: h&PT93QX6SibJf#
+  app:
+    build: ./
+    links:
+      - db
+    ports:
+      - "5000:5000"
