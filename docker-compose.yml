@@ -75,6 +75,6 @@ volumes:
   certs:
 
 networks:
-  proxy-tier:
+  default:
     external:
-      name: nginx-proxy
+      name: webproxy
