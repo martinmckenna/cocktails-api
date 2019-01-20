@@ -8,6 +8,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - app
     volumes:
       - conf:/etc/nginx/conf.d
       - vhost:/etc/nginx/vhost.d
@@ -59,6 +61,8 @@ services:
       - db
     ports:
       - "5000:5000"
+    depends_on:
+      - db
     environment:
       - VIRTUAL_HOST=api.atmarty.com
       - VITUAL_PORT=5000
