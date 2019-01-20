@@ -62,7 +62,7 @@ services:
     environment:
       - VIRTUAL_HOST=api.atmarty.com
       - VITUAL_PORT=5000
-      - VIRTUAL_NETWORK=nginx-proxy
+      - VIRTUAL_NETWORK=webproxy
       - LETSENCRYPT_HOST=api.atmarty.com
       - LETSENCRYPT_EMAIL=mmckenna.phila@gmail.com
 
