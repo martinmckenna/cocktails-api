@@ -1,6 +1,6 @@
 #!/bin/bash
 
-domains=(api.atmarty.com www.api.atmarty.com)
+domains=(api.barcart.net www.api.barcart.net)
 rsa_key_size=4096
 data_path="./data/certbot"
 email="mmckenna.phila@gmail.com" # Adding a valid address is strongly recommended
