@@ -25,8 +25,8 @@ services:
     environment:
       MYSQL_DATABASE: drinks
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_USER: my_user
-      MYSQL_PASSWORD: password_here
+      MYSQL_USER: marty
+      MYSQL_PASSWORD: h&PT93QX6SibJf#
     volumes:
       - my-datavolume:/var/www/mysql
   app:
