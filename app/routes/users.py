@@ -32,6 +32,14 @@ def get_user(current_user, id):
   return User.get_user_by_id(id)
 
 
+@users.route('/profile')
+@token_required
+def get_profile(current_user):
+  if current_user.public_id is None:
+    return send_401('/profile/')
+  return User.get_user_by_id(current_user.public_id)
+
+
 @users.route('/users', methods=['POST'])
 def create_user():
   # check for valid JSON
