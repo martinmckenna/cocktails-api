@@ -24,7 +24,13 @@ class Cocktail(db.Model):
         cascade='all, delete-orphan'
     )
 
-    def get_all_cocktails(name=None, ing_list=None, will_shop=False):
+    def get_all_cocktails(
+        name=None,
+        ing_list=None,
+        will_shop=False,
+        _page=1,
+        _page_size=25
+    ):
       """
       gets all cocktails from cocktails DB along with the ingredients
       that go into the cocktail
@@ -74,13 +80,18 @@ class Cocktail(db.Model):
 
       # if the client passed a name to search by, use that
       # otherise, return all cocktails
-      fetched_cocktails = (
+      fetched_cocktails_with_name = (
           base_query
           if name is None
           else base_query.filter(Cocktail.name.like('%'+name+'%'))
       )
+
+      paginated_query = fetched_cocktails_with_name.paginate(page=_page, per_page=_page_size, error_out=False)
+
       return send_200({
-          "cocktails": cocktail_schema.dump(fetched_cocktails.all()).data
+          "cocktails": cocktail_schema.dump(paginated_query.items).data,
+          "pages": paginated_query.pages,
+          "total_results": paginated_query.total
       }, '/cocktails/'
       )
     #   try:

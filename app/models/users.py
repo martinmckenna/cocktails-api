@@ -43,7 +43,13 @@ class User(db.Model):
       users = user_schema.dump(
          paginated_query.items
       ).data
-      return send_200({"users": users, "pages": paginated_query.pages, "total_results": paginated_query.total}, '/users/')
+      return send_200(
+          {
+              "users": users,
+              "pages": paginated_query.pages,
+              "total_results": paginated_query.total
+          },
+          '/users/')
     except:
       return send_400('Something went wrong', 'Error fetching data', '/users/')
 

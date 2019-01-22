@@ -31,10 +31,16 @@ def get_cocktails():
   except:
     return send_400(meta='ing_list param must be a string of numbers seperated by a string: (e.g: 1,2,3)')
 
+  try:
+    page = int(request.args.get('page'))
+  except:
+    page = 1
+
   return Cocktail.get_all_cocktails(
       name=name_filter,
       will_shop=will_shop_filter,
       ing_list=ing_list_as_array_of_ints,
+      _page=page
   )
 
 
