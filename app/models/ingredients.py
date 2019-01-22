@@ -11,20 +11,30 @@ class Ingredient(db.Model):
     name = db.Column(db.String(80), nullable=False, unique=True)
     ing_type = db.Column(db.String(20), nullable=False)
 
-    def get_all_ingredients(name=None):
+    def get_all_ingredients(name=None, _page=1, _page_size=25):
         ingredient_schema = IngredientSchema(strict=True, many=True)
 
         try:
             # if the client passed a name to search by, use that
             # otherise, return all ingredients
-            fetched_ingredients = (
+            base_query = (
                 Ingredient.query
                 if name is None
                 else Ingredient.query.filter(Ingredient.name.like('%'+name+'%'))
             )
+
+            paginated_query = base_query.paginate(page=_page, per_page=_page_size, error_out=False)
             ingredients = ingredient_schema.dump(
-                fetched_ingredients.all()).data
-            return send_200({"ingredients": ingredients}, '/ingredients/')
+                paginated_query.items
+            ).data
+            return send_200(
+                {
+                    "ingredients": ingredients,
+                    "pages": paginated_query.pages,
+                    "total_results": paginated_query.total
+                },
+                '/ingredients/'
+            )
         except:
             return send_400('Something went wrong', 'Error fetching data', '/ingredients/')
 
