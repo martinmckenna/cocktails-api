@@ -47,7 +47,7 @@ def get_cocktail(id):
 @token_required
 def add_cocktail(current_user):
   if not current_user.admin:
-    return send_401('/users/')
+    return send_401(location='/cocktails/')
   # check for valid JSON
   try:
       request_data = request.get_json()
@@ -76,7 +76,7 @@ def add_cocktail(current_user):
 @token_required
 def update_cocktail(current_user, id):
   if not current_user.admin:
-    return send_401('/users/')
+    return send_401(location='/cocktails/' + str(id))
   try:
     request_data = request.get_json()
   except:
@@ -109,7 +109,7 @@ def update_cocktail(current_user, id):
 @token_required
 def delete_cocktail(current_user, id):
   if not current_user.admin:
-    return send_401('/users/')
+    return send_401(location='/cocktails/' + str(id))
   return Cocktail.delete_cocktail_by_id(id)
 
 

@@ -18,7 +18,7 @@ users = Blueprint('users', __name__)
 @token_required
 def get_users(current_user):
   if not current_user.admin:
-    return send_401('/users/')
+    return send_401(location='/users/')
   # if a ?name="whatever" query string exists
   name_filter = request.args.get('name')
   return User.get_all_users(name_filter=name_filter)
@@ -28,7 +28,7 @@ def get_users(current_user):
 @token_required
 def get_user(current_user, id):
   if not current_user.admin and not current_user.public_id == id:
-    return send_401('/users/' + str(id))
+    return send_401(location='/users/' + str(id))
   return User.get_user_by_id(id)
 
 
@@ -36,7 +36,7 @@ def get_user(current_user, id):
 @token_required
 def get_profile(current_user):
   if current_user.public_id is None:
-    return send_401('/profile/')
+    return send_401(location='/profile/')
   return User.get_user_by_id(current_user.public_id)
 
 
@@ -63,7 +63,7 @@ def create_user():
 def add_user_favorite(current_user, id):
   # only allow a user to add a favorite for themselves, unless they're an admin
   if not current_user.admin and not current_user.public_id == id:
-    return send_401('/users/')
+    return send_401(location='/users/' + str(id))
 
   # check for valid JSON
   try:
@@ -82,7 +82,7 @@ def add_user_favorite(current_user, id):
 @token_required
 def update_user(current_user, id):
   if not current_user.admin:
-    return send_401('/users/' + str(id) + '/promote/')
+    return send_401(location='/users/' + str(id) + '/promote/')
   return User.promote_user_by_id(id)
 
 
@@ -91,7 +91,7 @@ def update_user(current_user, id):
 def delete_user(current_user, id):
   # only allow a user to delete themselves
   if not current_user.admin and not current_user.public_id == id:
-    return send_401('/users/')
+    return send_401(location='/users/' + str(id))
   return User.delete_user_by_id(id)
 
 @users.route('/login')

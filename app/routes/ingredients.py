@@ -27,7 +27,7 @@ def get_ingredient(id):
 @token_required
 def add_ingredient(current_user):
   if not current_user.admin:
-    return send_401('/users/')
+    return send_401(location='/ingredients/')
   try:
       request_data = request.get_json()
   except:
@@ -43,7 +43,7 @@ def add_ingredient(current_user):
 @token_required
 def update_ingredient(current_user, id):
   if not current_user.admin:
-    return send_401('/users/')
+    return send_401(location='/ingredients/' + str(id))
   try:
     request_data = request.get_json()
   except:
@@ -64,8 +64,8 @@ def update_ingredient(current_user, id):
 @token_required
 def delete_ingredient(current_user, id):
   if not current_user.admin:
-    return send_401('/users/')
-    
+    return send_401(location='/ingredients/' + str(id))
+
   return Ingredient.delete_ingredient_by_id(id)
 
 
