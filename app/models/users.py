@@ -20,6 +20,7 @@ class User(db.Model):
   name = db.Column(db.String(50))
   password = db.Column(db.String(80))
   admin = db.Column(db.Boolean)
+  email = db.Column(db.String(80))
   favorites = db.relationship(
       'UserFavorites',
       backref=db.backref('users', lazy='joined'),
@@ -65,7 +66,7 @@ class User(db.Model):
         else send_200(fetched_user[0], '/users/')
     )
 
-  def add_new_user(_name, _password):
+  def add_new_user(_name, _password, _email):
     user_schema = UserSchema(strict=True, many=True)
 
     # SELECT from users where the name is equal to the passed name
@@ -73,6 +74,10 @@ class User(db.Model):
     already_exists = check_for_duplicate(User, 'name', _name)
     if already_exists:
         return send_400('Invalid Payload', 'User already exists')
+
+    email_already_exists = check_for_duplicate(User, 'email', _email)
+    if email_already_exists:
+      return send_400('Invalid Payload', 'Email already in use')
 
     strong_password_pattern = re.compile(
         r'(?=^.{8,}$)(?=.*\d)(?=.*[!@#$%^&*.,]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$'
@@ -90,7 +95,8 @@ class User(db.Model):
         public_id=str(uuid.uuid4()),
         name=_name,
         password=hashed_password,
-        admin=False
+        admin=False,
+        email=_email
     )
 
     db.session.add(new_user)

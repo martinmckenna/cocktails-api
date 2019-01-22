@@ -61,7 +61,11 @@ def create_user():
   @todo
   1. Verify secure password
   """
-  return User.add_new_user(_name=request_data['name'], _password=request_data['password'])
+  return User.add_new_user(
+      _name=request_data['name'],
+      _password=request_data['password'],
+      _email=request_data['email']
+  )
 
 
 @users.route('/users/<string:id>', methods=['PUT'])
@@ -129,7 +133,7 @@ def login():
 
 def is_valid_user_object(user_object):
   # return true if we are passed "name" and "ing_type" keys in the dictionary
-  return "name" in user_object and "password" in user_object
+  return "name" in user_object and "password" in user_object and "email" in user_object
 
 
 def is_valid_put_object(put_object):
@@ -141,7 +145,7 @@ def is_valid_put_object(put_object):
 
 
 def post_error_payload(error_text="Invalid Payload", path='/'):
-  return send_400(error_text, "Try following this format { 'name': 'my_username', 'password': 'asdf123!' }", path)
+  return send_400(error_text, "Try following this format { 'name': 'my_username', 'password': 'asdf123!', 'email': 'email@example.com' }", path)
 
 
 def put_error_payload(error_text='Invalid Payload', path=''):
