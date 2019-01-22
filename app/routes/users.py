@@ -21,7 +21,13 @@ def get_users(current_user):
     return send_401(location='/users/')
   # if a ?name="whatever" query string exists
   name_filter = request.args.get('name')
-  return User.get_all_users(name_filter=name_filter)
+
+  try:
+    page = int(request.args.get('page'))
+  except:
+    page = 1
+
+  return User.get_all_users(name_filter=name_filter, _page=page)
 
 
 @users.route('/users/<string:id>')

@@ -26,21 +26,24 @@ class User(db.Model):
       cascade='all, delete-orphan'
   )
 
-  def get_all_users(name_filter=None):
+  def get_all_users(name_filter=None, _page=1, _per_page=25):
     user_schema = UserSchema(strict=True, many=True)
 
     try:
       # if the client passed a name to search by, use that
       # otherise, return all users
-      fetched_users = (
+      base_query = (
           User.query
           if name_filter is None
           else User.query.filter(User.name.like('%'+name_filter+'%'))
       )
+
+      paginated_query = base_query.paginate(page=_page, per_page=_per_page, error_out=False)
+
       users = user_schema.dump(
-          fetched_users.all()
+         paginated_query.items
       ).data
-      return send_200({"users": users}, '/users/')
+      return send_200({"users": users, "pages": paginated_query.pages, "total_results": paginated_query.total}, '/users/')
     except:
       return send_400('Something went wrong', 'Error fetching data', '/users/')
 
