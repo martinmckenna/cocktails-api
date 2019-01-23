@@ -28,7 +28,7 @@ services:
       MYSQL_USER: marty
       MYSQL_PASSWORD: h&PT93QX6SibJf#
     volumes:
-      - ./data/mariadb:/var/lib/mysql/data
+      - ./data/mariadb:/var/lib/mysql
   app:
     restart: always
     build: ./
