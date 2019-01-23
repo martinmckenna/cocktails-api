@@ -19,7 +19,7 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     restart: always
   db:
-    image: mysql:5.7
+    image: mariadb
     ports:
       - "32000:3306"
     environment:
@@ -28,11 +28,13 @@ services:
       MYSQL_USER: marty
       MYSQL_PASSWORD: h&PT93QX6SibJf#
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ./data/mariadb:/var/lib/mysql/data
   app:
     restart: always
     build: ./
     links:
+      - db
+    depends_on:
       - db
     ports:
       - "5000:5000"
