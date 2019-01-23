@@ -3,8 +3,11 @@ import os
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import create_database, database_exists
+from flask_cors import CORS
 
 app = Flask(__name__)
+# prevent CORS errors
+CORS(app)
 
 url = 'mysql+pymysql://marty:h&PT93QX6SibJf#@db:3306/drinks'
 
