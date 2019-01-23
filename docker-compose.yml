@@ -28,7 +28,7 @@ services:
       MYSQL_USER: marty
       MYSQL_PASSWORD: h&PT93QX6SibJf#
     volumes:
-      - my-datavolume:/var/www/mysql
+      - ./data/mysql:/var/www/mysql
   app:
     restart: always
     build: ./
