@@ -28,7 +28,7 @@ services:
       MYSQL_USER: marty
       MYSQL_PASSWORD: h&PT93QX6SibJf#
     volumes:
-      - ./data/mysql:/var/www/mysql
+      - ./data/mysql:/var/lib/mysql
   app:
     restart: always
     build: ./
@@ -36,5 +36,3 @@ services:
       - db
     ports:
       - "5000:5000"
-volumes:
-  my-datavolume:
