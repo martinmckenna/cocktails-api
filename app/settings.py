@@ -16,6 +16,8 @@ url = 'mysql+pymysql://marty:h&PT93QX6SibJf#@db:3306/drinks'
 app.config['SECRET_KEY'] = 'thisissecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_POOL_SIZE'] = 16
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 3600
 app.url_map.strict_slashes = False
 
 db = SQLAlchemy(app)
