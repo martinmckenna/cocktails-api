@@ -9,9 +9,9 @@ app = Flask(__name__)
 # prevent CORS errors
 CORS(app)
 
-url = 'mysql+pymysql://marty:h&PT93QX6SibJf#@db:3306/drinks'
+# url = 'mysql+pymysql://marty:h&PT93QX6SibJf#@db:3306/drinks'
 
-# url = 'mysql+pymysql://root:PiercetheSQL.14@127.0.0.1/hosting'
+url = 'mysql+pymysql://root:PiercetheSQL.14@127.0.0.1/hosting'
 
 app.config['SECRET_KEY'] = 'thisissecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = url

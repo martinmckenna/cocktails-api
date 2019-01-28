@@ -89,7 +89,7 @@ class Cocktail(db.Model):
       paginated_query = fetched_cocktails_with_name.paginate(page=_page, per_page=_page_size, error_out=False)
 
       return send_200({
-          "cocktails": cocktail_schema.dump(paginated_query.items).data,
+          "data": cocktail_schema.dump(paginated_query.items).data,
           "pages": paginated_query.pages,
           "total_results": paginated_query.total
       }, '/cocktails/'

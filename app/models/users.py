@@ -46,7 +46,7 @@ class User(db.Model):
       ).data
       return send_200(
           {
-              "users": users,
+              "data": users,
               "pages": paginated_query.pages,
               "total_results": paginated_query.total
           },

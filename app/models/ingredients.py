@@ -29,7 +29,7 @@ class Ingredient(db.Model):
             ).data
             return send_200(
                 {
-                    "ingredients": ingredients,
+                    "data": ingredients,
                     "pages": paginated_query.pages,
                     "total_results": paginated_query.total
                 },
