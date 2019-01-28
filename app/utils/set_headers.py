@@ -13,14 +13,17 @@ def send_200(data, location='/'):
   )
 
 
-def send_400(error="Invalid Payload", meta="", location='/'):
+def send_400(error="Invalid Payload", field="", location='/'):
     return Response(
         json.dumps({
             "error": error,
-            "meta": meta
+            "field": field
         }),
         status=400,
-        mimetype='application/json'
+        mimetype='application/json',
+        headers={
+            "location": location
+        }
     )
 
 
@@ -41,7 +44,6 @@ def send_401(error='Unauthorized', location='/'):
     return Response(
         json.dumps({
             'error': error,
-            'meta': 'You do not have privledges to perform this action'
         }),
         status=401,
         headers={

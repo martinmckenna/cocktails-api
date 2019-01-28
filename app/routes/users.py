@@ -52,7 +52,7 @@ def create_user():
   try:
       request_data = request.get_json()
   except:
-      return post_error_payload("Invalid JSON")
+      return post_error_payload(error="Invalid JSON")
 
   if request_data is None or not is_valid_user_object(request_data):
     return post_error_payload()
@@ -79,7 +79,7 @@ def add_user_favorite(current_user, id):
   try:
     request_data = request.get_json()
   except:
-    return put_error_payload("Invalid JSON")
+    return put_error_payload(error="Invalid JSON")
 
   if request_data is None or not "cocktails" in request_data and is_valid_put_object(request_data):
     return put_error_payload()
@@ -129,7 +129,7 @@ def login():
     return json.dumps({'token': token.decode('UTF-8')})
 
   # if passwords did not match
-  return send_400(error='Password incorrect')
+  return send_400(error='Password incorrect', field='password')
 
 def is_valid_user_object(user_object):
   # return true if we are passed "name" and "ing_type" keys in the dictionary
@@ -144,9 +144,9 @@ def is_valid_put_object(put_object):
     )
 
 
-def post_error_payload(error_text="Invalid Payload", path='/'):
-  return send_400(error_text, "Try following this format { 'name': 'my_username', 'password': 'asdf123!', 'email': 'email@example.com' }", path)
+def post_error_payload(error_text="Invalid Payload", _path='/'):
+  return send_400(error=error_text, location=_path)
 
 
-def put_error_payload(error_text='Invalid Payload', path=''):
-  return send_400(error_text, meta="Try following this format { 'cocktails': [1, 2, 3] }")
+def put_error_payload(error_text="Try following this format { 'cocktails': [1, 2, 3] }", path=''):
+  return send_400(error=error_text, location=_path)

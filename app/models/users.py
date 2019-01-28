@@ -52,7 +52,7 @@ class User(db.Model):
           },
           '/users/')
     except:
-      return send_400('Something went wrong', 'Error fetching data', '/users/')
+      return send_400(error='Error fetching data', location='/users/')
 
   def get_user_by_id(_id):
     user_schema = UserSchema(strict=True, many=True)
@@ -73,20 +73,21 @@ class User(db.Model):
     # and put inside a list. If list[0] is None, it means this is not a duplicate
     already_exists = check_for_duplicate(User, 'name', _name)
     if already_exists:
-        return send_400('Invalid Payload', 'User already exists')
+        return send_400(error='User already exists', field='username')
 
     email_already_exists = check_for_duplicate(User, 'email', _email)
     if email_already_exists:
-      return send_400('Invalid Payload', 'Email already in use')
+      return send_400(error='Email already in use', field='email')
 
     strong_password_pattern = re.compile(
         r'(?=^.{8,}$)(?=.*\d)(?=.*[!@#$%^&*.,]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$'
     )
     if not strong_password_pattern.match(_password):
       return send_400(
-          meta='Password too weak. Enter a password of at least 8 characters containing one ' +
+          error='Password too weak. Enter a password of at least 8 characters containing one ' +
           'lowercase letter, one uppercase letter, a number, and one of the following special ' +
-          'characters: ! @ $ % ^ & * . ,'
+          'characters: ! @ $ % ^ & * . ,',
+          field='password'
       )
 
     hashed_password = generate_password_hash(_password, method='sha256')
@@ -115,12 +116,12 @@ class User(db.Model):
 
     # validate we have an array of ints
     if not is_array_of_ints(list_of_cocktails):
-      return send_400(meta="Please match the following format: { 'cocktails': [1, 2, 3] }")
+      return send_400(error="Please match the following format: { 'cocktails': [1, 2, 3] }")
 
     # validate each cocktail id exists in the DB
     cocktails_to_commit = User.generate_cocktails_to_add_to_user(list_of_cocktails)
     if list_contains_none_elements(cocktails_to_commit) is True:
-      return send_400('Invalid payload', 'Invalid cocktail ID passed', '/users/')
+      return send_400(error='Invalid cocktail ID passed', location='/users/')
     else:
       fetched_user.favorites = cocktails_to_commit
       db.session.commit()
@@ -146,7 +147,7 @@ class User(db.Model):
       db.session.commit()
       return send_200(user_schema.dump([fetched_user]).data[0], '/users/' + str(_id))
     except:
-      return send_400('Something went wrong', 'Could not update user entry')
+      return send_400(error='Could not update user entry')
 
   def delete_user_by_id(_id):
     try:
@@ -157,7 +158,7 @@ class User(db.Model):
       db.session.commit()
       return send_200({}, '/users/' + str(_id))
     except:
-      return send_400('Something went wrong', 'Could not delete entry')
+      return send_400(error='Could not delete entry')
 
   def generate_cocktails_to_add_to_user(list_of_ids):
     """

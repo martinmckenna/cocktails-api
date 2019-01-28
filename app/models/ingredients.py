@@ -36,7 +36,7 @@ class Ingredient(db.Model):
                 '/ingredients/'
             )
         except:
-            return send_400('Something went wrong', 'Error fetching data', '/ingredients/')
+            return send_400(error='Error fetching data', location='/ingredients/')
 
     def get_ingredient_by_id(_id):
         ingredient_schema = IngredientSchema(strict=True, many=True)
@@ -59,12 +59,12 @@ class Ingredient(db.Model):
             # and put inside a list. If list[0] is None, it means this is not a duplicate
             already_exists = check_for_duplicate(Ingredient, 'name', _name)
             if already_exists:
-                return send_400('Invalid Payload', 'Ingredient already exists')
+                return send_400(error='Ingredient already exists', field='name')
             db.session.add(new_ingredient)
             db.session.commit()
             return send_200(ingredient_schema.dump([new_ingredient]).data[0], '/ingredients/')
         except:
-            return send_400('Something went wrong', 'Error fetching data', '/ingredients/')
+            return send_400(error='Error fetching data', location='/ingredients/')
 
     def update_ingredient_by_id(_id, _name, _type):
         ingredient_schema = IngredientSchema(strict=True, many=True)
@@ -78,7 +78,7 @@ class Ingredient(db.Model):
         # and put inside a list. If list[0] is None, it means this is not a duplicate
         already_exists = check_for_duplicate(Ingredient, 'name', _name)
         if already_exists:
-            return send_400('Invalid Payload', 'Ingredient already exists')
+            return send_400(error='Ingredient already exists', field='name')
 
         # set the new row cells if the client implicitly supplied these values
         target_ingredient.name = _name if _name is not None else target_ingredient.name
@@ -96,7 +96,7 @@ class Ingredient(db.Model):
             db.session.commit()
             return send_200({}, '/ingredients/' + str(_id))
         except:
-            return send_400('Something went wrong', 'Could not delete entry')
+            return send_400(error='Could not delete entry')
 
 # Necessary for transforming sqlalchemy data into serialized JSON
 

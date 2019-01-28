@@ -94,9 +94,6 @@ class Cocktail(db.Model):
           "total_results": paginated_query.total
       }, '/cocktails/'
       )
-    #   try:
-    #   except:
-        # return send_400('Something went wrong', 'Error fetching data', '/cocktails/')
 
     def get_cocktail_by_id(_id):
         cocktail_schema = CocktailSchema(strict=True, many=True)
@@ -118,19 +115,19 @@ class Cocktail(db.Model):
         # and put inside a list. If list[0] is None, it means this is not a duplicate
         already_exists = check_for_duplicate(Cocktail, 'name', _name)
         if already_exists:
-                return send_400('Invalid Payload', 'Cocktail already exists')
+                return send_400(error='Cocktail already exists', field='name')
 
         if not ing_list_is_valid(ing_list):
           return send_400(
-              "Invalid payload",
-              "Ingredient list invalid. Try the following format: " +
-              "{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }"
+              error="Ingredient list invalid. Try the following format: " +
+              "{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }",
+              field='ing_list'
           )
 
         ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
 
         if list_contains_none_elements(ingredients_to_append) is True:
-            return send_400('Invalid payload', 'Invalid ingredient ID passed', '/cocktails/')
+            return send_400(error='Invalid ingredient ID passed', location='/cocktails/', field='ing_list')
         else:
             new_cocktail.ingredients = ingredients_to_append
 
@@ -156,7 +153,7 @@ class Cocktail(db.Model):
         # and put inside a list. If list[0] is None, it means this is not a duplicate
         already_exists = check_for_duplicate(Cocktail, 'name', _name)
         if already_exists:
-                return send_400('Invalid Payload', 'Cocktail already exists')
+                return send_400(error='Cocktail already exists', field='name')
 
         # list of ingredients we want to add
         # check to see if client has passed ing_list and is not an empty array
@@ -164,14 +161,18 @@ class Cocktail(db.Model):
            # ensure the ingredients is a list of dicts with the valid keys
             if not ing_list_is_valid(ing_list):
               return send_400(
-                  "Invalid payload",
-                  "Ingredient list invalid. Try the following format: " +
-                  "{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }"
+                  error="Ingredient list invalid. Try the following format: " +
+                  "{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }",
+                  field='ing_list'
               )
 
             ingredients_to_append = generate_ingredients_for_cocktail(ing_list)
             if list_contains_none_elements(ingredients_to_append) is True:
-                return send_400('Invalid payload', 'Invalid ingredient ID passed', '/cocktails/')
+                return send_400(
+                    error='Invalid ingredient ID passed',
+                    location='/cocktails/',
+                    field='ing_list'
+                )
             else:
                 target_cocktail.ingredients = ingredients_to_append
 
@@ -190,9 +191,6 @@ class Cocktail(db.Model):
         db.session.delete(cocktail_to_delete)
         db.session.commit()
         return send_200({}, '/cocktails/' + str(_id))
-        # try:
-        # except:
-        # return send_400('Something went wrong', 'Could not delete entry', '/cocktails/' + str(_id))
 
 
 def generate_ingredients_for_cocktail(ing_list):

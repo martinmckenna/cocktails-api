@@ -29,7 +29,7 @@ def get_cocktails():
         else convert_to_array_of_ints(ing_list_filter)
     )
   except:
-    return send_400(meta='ing_list param must be a string of numbers seperated by a string: (e.g: 1,2,3)')
+    return send_400(error='ing_list param must be a string of numbers seperated by a string: (e.g: 1,2,3)')
 
   try:
     page = int(request.args.get('page'))
@@ -58,13 +58,11 @@ def add_cocktail(current_user):
   try:
       request_data = request.get_json()
   except:
-      return post_error_payload("Invalid JSON")
+      return post_error_payload(error="Invalid JSON")
 
   # if the user passed a "finish" key, make sure it's value is correct
   if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish']):
-    return post_error_payload("The 'finish' key must either be 'shaken' or 'stirred'")
-
-  print('hello worlds')
+    return post_error_payload(error="The 'finish' key must either be 'shaken' or 'stirred'", field='finish')
 
   # finally, if we have the "name" and "glass" keys, update the DB
   if(is_valid_cocktail_object(request_data)):
@@ -86,11 +84,11 @@ def update_cocktail(current_user, id):
   try:
     request_data = request.get_json()
   except:
-    return post_error_payload("Invalid JSON")
+    return post_error_payload(error="Invalid JSON")
 
   # if the user passed a "finish" key, make sure it's value is correct
   if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish'], True):
-    return post_error_payload("The 'finish' key must either be 'shaken' or 'stirred'")
+    return post_error_payload(error="The 'finish' key must either be 'shaken' or 'stirred'", field='finish')
 
   # allow the client to implicitly change the finish to "null"
   # if they're sending the key in the request
@@ -144,10 +142,8 @@ def is_valid_array_of_ingredients(ing_list):
   )
 
 
-def post_error_payload(error_text="Invalid Payload", path='/'):
+def post_error_payload(error_text="Invalid Payload", _path='/'):
   return send_400(
-      error_text,
-      "Try following this format " +
-      "{ 'name': 'my_cocktail', 'glass': 'rocks', 'finish': 'shaken', ing_list: [{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }] }",
-      path
+      error=error_text,
+      location=_path
   )

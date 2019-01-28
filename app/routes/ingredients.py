@@ -36,7 +36,7 @@ def add_ingredient(current_user):
   try:
       request_data = request.get_json()
   except:
-      return post_error_payload("Invalid JSON")
+      return post_error_payload(error="Invalid JSON")
 
   if request_data is None or not is_valid_ingredient_object(request_data):
     return post_error_payload()
@@ -52,10 +52,10 @@ def update_ingredient(current_user, id):
   try:
     request_data = request.get_json()
   except:
-    return post_error_payload("Invalid JSON")
+    return post_error_payload(error="Invalid JSON")
 
   if request_data is None:
-    return post_error_payload('Invalid JSON')
+    return post_error_payload(error='Invalid JSON')
 
   # If the ingredient was not found in the DB, send a 404
   return Ingredient.update_ingredient_by_id(
@@ -79,5 +79,5 @@ def is_valid_ingredient_object(ingredient_object):
   return "name" in ingredient_object and "ing_type" in ingredient_object
 
 
-def post_error_payload(error_text="Invalid Payload", path='/'):
-  return send_400(error_text, "Try following this format { 'name': 'my_ingredient', 'ing_type': 'juice' }", path)
+def post_error_payload(error_text="Invalid Payload", _path='/'):
+  return send_400(error=error_text, location=_path)
