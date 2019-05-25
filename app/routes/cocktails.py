@@ -58,11 +58,11 @@ def add_cocktail(current_user):
   try:
       request_data = request.get_json()
   except:
-      return post_error_payload(error="Invalid JSON")
+      return send_400(error="Invalid JSON")
 
   # if the user passed a "finish" key, make sure it's value is correct
-  if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish']):
-    return post_error_payload(error="The 'finish' key must either be 'shaken' or 'stirred'", field='finish')
+  if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish'], True):
+    return send_400(error="The 'finish' key must either be 'shaken', 'stirred', 'stirred with ice', or 'shaken with ice'", field='finish')
 
   # finally, if we have the "name" and "glass" keys, update the DB
   if(is_valid_cocktail_object(request_data)):
@@ -73,7 +73,7 @@ def add_cocktail(current_user):
         value_in_dict_or_none('finish', request_data)
     )
   else:
-    return post_error_payload()
+    return send_400()
 
 
 @cocktails.route('/cocktails/<int:id>', methods=['PUT'])
@@ -84,11 +84,11 @@ def update_cocktail(current_user, id):
   try:
     request_data = request.get_json()
   except:
-    return post_error_payload(error="Invalid JSON")
+    return send_400(error="Invalid JSON")
 
   # if the user passed a "finish" key, make sure it's value is correct
   if request_data is None or 'finish' in request_data and not is_valid_finish_string(request_data['finish'], True):
-    return post_error_payload(error="The 'finish' key must either be 'shaken' or 'stirred'", field='finish')
+    return send_400(error="The 'finish' key must either be 'shaken' or 'stirred'", field='finish')
 
   # allow the client to implicitly change the finish to "null"
   # if they're sending the key in the request
@@ -131,7 +131,10 @@ def is_valid_finish_string(finish, null_allowed=False):
   # also, if we are allowing an implicit None, let the validation pass
   is_null_and_allowed = True if (
       finish is None and null_allowed is True) else False
-  return finish == 'shaken' or finish == 'stirred' or is_null_and_allowed
+  lowercase_finish = finish.lower()
+  allowed_values = ['shaken', 'stirred', 'stirred with ice', 'shaken with ice']
+  print(lowercase_finish in allowed_values)
+  return lowercase_finish in allowed_values or is_null_and_allowed
 
 
 def is_valid_array_of_ingredients(ing_list):
@@ -139,11 +142,4 @@ def is_valid_array_of_ingredients(ing_list):
       False
       if type(ing_list) is not list or ing_list is None or len(ing_list) == 0
       else True
-  )
-
-
-def post_error_payload(error_text="Invalid Payload", _path='/'):
-  return send_400(
-      error=error_text,
-      location=_path
   )

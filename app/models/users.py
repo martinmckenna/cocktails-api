@@ -1,5 +1,6 @@
 from flask import Flask
 from settings import db, ma
+from sqlalchemy.orm import load_only
 import re
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -34,6 +35,7 @@ class User(db.Model):
       # if the client passed a name to search by, use that
       # otherise, return all users
       base_query = (
+          # User.query.options(load_only("email"))
           User.query
           if name_filter is None
           else User.query.filter(User.name.like('%'+name_filter+'%'))
@@ -205,12 +207,6 @@ class UserSchema(ma.ModelSchema):
           i += 1
         
         return result_list
-
-        # return {
-        #     'name': obj.favorites.cocktail.name,
-        #     'finish': obj.favorites.cocktail.finish,
-        #     'glass': obj.favorites.cocktail.glass
-        # }
 
     class Meta:
       model = User

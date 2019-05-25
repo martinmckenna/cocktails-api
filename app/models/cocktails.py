@@ -45,7 +45,7 @@ class Cocktail(db.Model):
       If False, passing "Gin" will not return "Gin And Tonic"
       """
       cocktail_schema = CocktailSchema(strict=True, many=True)
-      base_query = Cocktail.query
+      base_query = Cocktail.query.order_by(Cocktail.name)
 
       """
       check to see if client passed an ing_list to filter by

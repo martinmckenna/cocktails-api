@@ -52,7 +52,7 @@ def create_user():
   try:
       request_data = request.get_json()
   except:
-      return post_error_payload(error="Invalid JSON")
+      return post_error_payload(error_text="Invalid JSON")
 
   if request_data is None or not is_valid_user_object(request_data):
     return post_error_payload()
@@ -79,7 +79,7 @@ def add_user_favorite(current_user, id):
   try:
     request_data = request.get_json()
   except:
-    return put_error_payload(error="Invalid JSON")
+    return put_error_payload(error_text="Invalid JSON")
 
   if request_data is None or not "cocktails" in request_data and is_valid_put_object(request_data):
     return put_error_payload()

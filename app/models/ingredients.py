@@ -18,9 +18,9 @@ class Ingredient(db.Model):
             # if the client passed a name to search by, use that
             # otherise, return all ingredients
             base_query = (
-                Ingredient.query
+                Ingredient.query.order_by(Ingredient.name)
                 if name is None
-                else Ingredient.query.filter(Ingredient.name.like('%'+name+'%'))
+                else Ingredient.query.filter(Ingredient.name.like('%'+name+'%')).order_by(Ingredient.name)
             )
 
             paginated_query = base_query.paginate(page=_page, per_page=_page_size, error_out=False)
