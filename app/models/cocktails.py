@@ -120,7 +120,7 @@ class Cocktail(db.Model):
         if not ing_list_is_valid(ing_list):
           return send_400(
               error="Ingredient list invalid. Try the following format: " +
-              "{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }",
+              "{ 'id': 1, 'unit': 'ounces', 'ounces': 2.5, 'action': 'muddle', 'step': 1 }",
               field='ing_list'
           )
 
@@ -162,7 +162,7 @@ class Cocktail(db.Model):
             if not ing_list_is_valid(ing_list):
               return send_400(
                   error="Ingredient list invalid. Try the following format: " +
-                  "{ 'id': 1, 'ounces': 2.5, 'action': 'muddle', 'step': 1 }",
+                  "{ 'id': 1, 'unit': 'ounces', 'ounces': 2.5, 'action': 'muddle', 'step': 1 }",
                   field='ing_list'
               )
 
@@ -214,6 +214,7 @@ def generate_ingredients_for_cocktail(ing_list):
                 CocktailIngredient(
                     ing_id=ing_to_commit.id,
                     ounces=ing_list[i].get('ounces'),
+                    unit=ing_list[i].get('unit'),
                     step=ing_list[i].get('step'),
                     action=ing_list[i].get('action')
                 )
@@ -237,6 +238,7 @@ def ing_list_is_valid(ing_list):
         if type(ing_list[i]) is dict
         and ing_list[i].get('id') is not None
         and ing_list[i].get('ounces') is not None
+        and ing_list[i].get('unit') is not None
         and ing_list[i].get('action') is not None
         and ing_list[i].get('step') is not None
         else results.append(False)
@@ -275,6 +277,7 @@ class CocktailSchema(ma.ModelSchema):
             # create a dict from the fields that live in the relational table
             relational_fields_dict = {
                 'ounces': obj.ingredients[i].ounces,
+                'unit': obj.ingredients[i].unit,
                 'action': obj.ingredients[i].action,
                 'step': obj.ingredients[i].step
             }

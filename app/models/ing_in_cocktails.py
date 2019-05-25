@@ -9,6 +9,7 @@ class CocktailIngredient(db.Model):
     ing_id = db.Column(db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
     cocktail_id = db.Column(db.Integer, db.ForeignKey('cocktails.id'), primary_key=True)
     ounces = db.Column(db.Float, nullable=False)
+    unit = db.Column(db.String(20), nullable=False)
     action = db.Column(db.String(20), nullable=False)
     step = db.Column(db.Integer, nullable=False)
 
