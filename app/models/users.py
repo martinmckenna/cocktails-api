@@ -29,7 +29,7 @@ class User(db.Model):
   )
 
   def get_all_users(name_filter=None, _page=1, _per_page=25):
-    user_schema = UserSchema(strict=True, many=True)
+    user_schema = UserSchema(strict=True, many=True, load_only=['password'])
 
     try:
       # if the client passed a name to search by, use that
@@ -57,7 +57,7 @@ class User(db.Model):
       return send_400(error='Error fetching data', location='/users/')
 
   def get_user_by_id(_id):
-    user_schema = UserSchema(strict=True, many=True)
+    user_schema = UserSchema(strict=True, many=True, load_only=['password'])
     fetched_user = user_schema.dump({
         User.query.filter_by(public_id=_id).first()
     }).data
@@ -69,7 +69,7 @@ class User(db.Model):
     )
 
   def add_new_user(_name, _password, _email):
-    user_schema = UserSchema(strict=True, many=True)
+    user_schema = UserSchema(strict=True, many=True, load_only=['password'])
 
     # SELECT from users where the name is equal to the passed name
     # and put inside a list. If list[0] is None, it means this is not a duplicate
@@ -108,7 +108,7 @@ class User(db.Model):
     return send_200(user_schema.dump([new_user]).data[0], '/users/')
 
   def add_cocktail_to_user(_pub_id, list_of_cocktails):
-    user_schema = UserSchema(strict=True, many=True)
+    user_schema = UserSchema(strict=True, many=True, load_only=['password'])
     
     fetched_user = User.query.filter_by(public_id=_pub_id).first()
       
@@ -132,7 +132,7 @@ class User(db.Model):
     return send_200(user_schema.dump([fetched_user]).data, '/users/' + str(_pub_id))
 
   def promote_user_by_id(_id):
-    user_schema = UserSchema(strict=True, many=True)
+    user_schema = UserSchema(strict=True, many=True, load_only=['password'])
     """
     currently only has one feature - to promote user
     to be an admin user
@@ -187,7 +187,6 @@ class User(db.Model):
     return result
 
 # Necessary for transforming sqlalchemy data into serialized JSON
-
 
 class UserSchema(ma.ModelSchema):
     # this is responsible for returning all the favorites on the user payload
