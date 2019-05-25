@@ -1,5 +1,21 @@
 ## Getting Started
 
+### Deploying
+
+Once the new code has been pulled on the server, run:
+
+```
+sudo docker-compose build app
+sudo docker-compose up app -d
+```
+
+If this doesn't work, try:
+
+```
+sudo docker-compose down --rmi all --remove-orphans
+sudo docker-compose up -d
+```
+
 ### Set up Virutal Env
 
 1. Make sure you have virtualenv installed
