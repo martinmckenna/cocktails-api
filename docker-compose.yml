@@ -25,8 +25,8 @@ services:
     environment:
       MYSQL_DATABASE: drinks
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_USER: marty
-      MYSQL_PASSWORD: h&PT93QX6SibJf#
+      MYSQL_USER: EXAMPLE_USER
+      MYSQL_PASSWORD: EXAMPLE_PASS
     volumes:
       - ./data/mariadb:/var/lib/mysql
   app:
